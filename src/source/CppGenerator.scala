@@ -139,7 +139,9 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     r.fields.foreach(f => refs.find(f.ty, false))
     r.consts.foreach(c => refs.find(c.ty, false))
     refs.hpp.add("#include <utility>") // Add for std::move
-
+    if (r.derivingTypes.contains(DerivingType.Json)) {
+      refs.cpp.add("#include <json11/json11.hpp>")
+    }
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, " final")
     val actualSelf = marshal.typename(cppName, r)
@@ -182,6 +184,14 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"friend bool operator>=(const $actualSelf& lhs, const $actualSelf& rhs);")
         }
 
+        if (r.derivingTypes.contains(DerivingType.Json)) {
+          w.wl
+          w.wl(s"friend std::string  jsonFrom${actualSelf} (const $actualSelf& record);")
+          w.wl(s"friend json11::Json parsedJsonFrom${actualSelf} (const $actualSelf& record);")
+          w.wl(s"friend $actualSelf& jsonTo${actualSelf} (const std::string data);")
+          w.wl(s"friend $actualSelf& parsedJsonTo${actualSelf} (const json11::Json json);")
+        }
+
         // Constructor.
         if(r.fields.nonEmpty) {
           w.wl
@@ -222,7 +232,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
               w.wl(";")
             } else {
              w.wl("return true;")
-           }
+            }
           }
           w.wl
           w.w(s"bool operator!=(const $actualSelf& lhs, const $actualSelf& rhs)").braced {
@@ -255,6 +265,87 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl
           w.w(s"bool operator>=(const $actualSelf& lhs, const $actualSelf& rhs)").braced {
             w.wl("return !(lhs < rhs);")
+          }
+        }
+
+        if (r.derivingTypes.contains(DerivingType.Json)) {
+          w.wl
+          w.w(s"std::string jsonFrom${actualSelf} (const $actualSelf& record)").braced {
+            w.wl(s"return parsedJsonFrom${actualSelf}(record).dump();")
+          }
+          w.wl
+          w.w(s"std::string parsedJsonFrom${actualSelf} (const $actualSelf& record)").braced {
+            def cppFor(expr: MExpr, name: String, value: String) : String = {
+              expr.base match {
+                case MList => {
+                  s"""std::vector<json11::Json> vector_with_json_${name};
+                      |${w.getCurrentIndent()}for (auto &item : $value) {
+                      |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item")}
+                      |${w.getCurrentIndent()}${w.getIndent()}vector_with_json_${name}.push_back(item_value);
+                      |${w.getCurrentIndent()}}
+                      |${w.getCurrentIndent()}json11::Json $name = json11::Json::array({vector_with_json_${name}});""".stripMargin('|')
+                }
+                case MString => s"json11::Json $name = json11::Json($value);"
+                case p: MPrimitive => s"json11::Json $name = json11::Json($value);"
+                case MDate => s"json11::Json $name = json11::Json($value.toString())"
+                case d: MDef => d.defType match {
+                  case DRecord => s"json11::Json $name = parsedJsonFrom${marshal.fieldType(expr)}($value);"
+                  case _ => throw new AssertionError("Unreachable")
+                }
+                case _ => throw new AssertionError("Unreachable")
+              }
+            }
+
+
+            for (f <- r.fields) {
+              val name = idCpp.field(f.ident)
+              w.wl(cppFor(f.ty.resolved, name, s"record.$name"))
+            }
+            val params = r.fields.map((f) => {
+              "{ \"" + idCpp.field(f.ident) + "\", " + idCpp.field(f.ident) + " }"
+            }).mkString(", ")
+            w.wl(s"return Json::object({$params});")
+          }
+          w.wl
+          w.w(s"$actualSelf& jsonTo${actualSelf} (const std::string data)").braced {
+            w.wl("json = json11::Json::parse(data, error);")
+            w.wl("if (!error.empty())").braced {
+              w.wl("throw error;")
+            }
+            w.wl(s"return parsedJsonTo${actualSelf}(json);")
+          }
+          w.wl
+          w.w(s"$actualSelf& parsedJsonTo${actualSelf} (const json11::Json& json)").braced {
+            def cppFor(expr: MExpr, name: String, json: String) : String = {
+              expr.base match {
+                case MList => {
+                  s"""std::vector<${marshal.fieldType(expr.args.head)}> $name;
+                  |${w.getCurrentIndent()}for (auto &item : $json.array_items()) {
+                  |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item")}
+                  |${w.getCurrentIndent()}${w.getIndent()}name.push_back(item_value);
+                  |${w.getCurrentIndent()}}""".stripMargin('|')
+                }
+                case MString => s"${marshal.typename(expr)} $name = $json.string_value();"
+                case p: MPrimitive => p._idlName match {
+                  case "bool" => s"${p.cName} $name =$json.bool_value();"
+                  case "i8" | "i16" | "i32" | "i64" => s"${p.cName} $name = static_cast<${p.cName}>($json.int_value());"
+                  case "f32" | "f64" => s"${p.cName} $name = static_cast<${p.cName}>($json.number_value());"
+                  case _ => throw new AssertionError("Unreachable")
+                }
+                case MDate => s"std::string $name = $json.string_value()"
+                case d: MDef => d.defType match {
+                  case DRecord => s"${marshal.fieldType(expr)} $name = parsedJsonTo${marshal.fieldType(expr)}($json);"
+                  case _ => throw new AssertionError("Unreachable")
+                }
+                case _ => throw new AssertionError("Unreachable")
+              }
+            }
+            for (f <- r.fields) {
+              val name = idCpp.field(f.ident)
+              w.wl(cppFor(f.ty.resolved, name, "json[\"" + name + "\"]"))
+            }
+            val params = r.fields.map((f) => idCpp.field(f.ident)).mkString(", ")
+            w.wl(s"return ${actualSelf}($params);")
           }
         }
       })

@@ -61,6 +61,10 @@ class IndentWriter(out: Writer, indent: String = "    ", startIndent: String = "
     currentIndent = currentIndent.substring(0, currentIndent.length - indent.length)
   }
 
+  def getCurrentIndent(): String = currentIndent
+
+  def getIndent(): String = indent
+
   def nested(f: => Unit): Unit = nested_(1, f)
 
   def nestedN(amount: Int): ((=> Unit) => Unit) = nested_(amount, _)
