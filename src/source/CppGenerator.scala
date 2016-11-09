@@ -140,7 +140,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     r.consts.foreach(c => refs.find(c.ty, false))
     refs.hpp.add("#include <utility>") // Add for std::move
     if (r.derivingTypes.contains(DerivingType.Json)) {
-      refs.cpp.add("#include <json11/json11.hpp>")
+      refs.hpp.add("#include <json11/json11.hpp>")
     }
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, " final")
@@ -186,10 +186,10 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 
         if (r.derivingTypes.contains(DerivingType.Json)) {
           w.wl
-          w.wl(s"friend std::string  jsonFrom${actualSelf} (const $actualSelf& record);")
           w.wl(s"friend json11::Json parsedJsonFrom${actualSelf} (const $actualSelf& record);")
-          w.wl(s"friend $actualSelf& jsonTo${actualSelf} (const std::string data);")
-          w.wl(s"friend $actualSelf& parsedJsonTo${actualSelf} (const json11::Json json);")
+          w.wl(s"friend std::string  jsonFrom${actualSelf} (const $actualSelf& record);")
+          w.wl(s"friend $actualSelf parsedJsonTo${actualSelf} (const json11::Json& json);")
+          w.wl(s"friend $actualSelf jsonTo${actualSelf} (const std::string data);")
         }
 
         // Constructor.
@@ -270,11 +270,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 
         if (r.derivingTypes.contains(DerivingType.Json)) {
           w.wl
-          w.w(s"std::string jsonFrom${actualSelf} (const $actualSelf& record)").braced {
-            w.wl(s"return parsedJsonFrom${actualSelf}(record).dump();")
-          }
-          w.wl
-          w.w(s"std::string parsedJsonFrom${actualSelf} (const $actualSelf& record)").braced {
+          w.w(s"json11::Json parsedJsonFrom${actualSelf} (const $actualSelf& record)").braced {
             def cppFor(expr: MExpr, name: String, value: String) : String = {
               expr.base match {
                 case MList => {
@@ -288,6 +284,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                 case MString => s"json11::Json $name = json11::Json($value);"
                 case p: MPrimitive => s"json11::Json $name = json11::Json($value);"
                 case MDate => s"json11::Json $name = json11::Json($value.toString())"
+                case MOptional => s"json11::Json $name = json11::Json($value.value_or(NULL))"
                 case d: MDef => d.defType match {
                   case DRecord => s"json11::Json $name = parsedJsonFrom${marshal.fieldType(expr)}($value);"
                   case _ => throw new AssertionError("Unreachable")
@@ -304,18 +301,14 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
             val params = r.fields.map((f) => {
               "{ \"" + idCpp.field(f.ident) + "\", " + idCpp.field(f.ident) + " }"
             }).mkString(", ")
-            w.wl(s"return Json::object({$params});")
+            w.wl(s"return json11::Json::object({$params});")
           }
           w.wl
-          w.w(s"$actualSelf& jsonTo${actualSelf} (const std::string data)").braced {
-            w.wl("json = json11::Json::parse(data, error);")
-            w.wl("if (!error.empty())").braced {
-              w.wl("throw error;")
-            }
-            w.wl(s"return parsedJsonTo${actualSelf}(json);")
+          w.w(s"std::string jsonFrom${actualSelf} (const $actualSelf& record)").braced {
+            w.wl(s"return parsedJsonFrom${actualSelf}(record).dump();")
           }
           w.wl
-          w.w(s"$actualSelf& parsedJsonTo${actualSelf} (const json11::Json& json)").braced {
+          w.w(s"$actualSelf parsedJsonTo${actualSelf} (const json11::Json& parsed_json)").braced {
             def cppFor(expr: MExpr, name: String, json: String) : String = {
               expr.base match {
                 case MList => {
@@ -333,6 +326,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                   case _ => throw new AssertionError("Unreachable")
                 }
                 case MDate => s"std::string $name = $json.string_value()"
+                case MOptional => cppFor(expr.args.head, name, json)
                 case d: MDef => d.defType match {
                   case DRecord => s"${marshal.fieldType(expr)} $name = parsedJsonTo${marshal.fieldType(expr)}($json);"
                   case _ => throw new AssertionError("Unreachable")
@@ -342,10 +336,20 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
             }
             for (f <- r.fields) {
               val name = idCpp.field(f.ident)
-              w.wl(cppFor(f.ty.resolved, name, "json[\"" + name + "\"]"))
+              w.wl(cppFor(f.ty.resolved, name, "parsed_json[\"" + name + "\"]"))
             }
             val params = r.fields.map((f) => idCpp.field(f.ident)).mkString(", ")
-            w.wl(s"return ${actualSelf}($params);")
+            w.wl(s"${actualSelf} record ($params);")
+            w.wl(s"return record;")
+          }
+          w.wl
+          w.w(s"$actualSelf jsonTo${actualSelf} (const std::string data)").braced {
+            w.wl("std::string error;")
+            w.wl("json11::Json parsed_json = json11::Json::parse(data, error);")
+            w.wl("if (!error.empty())").braced {
+              w.wl("throw error;")
+            }
+            w.wl(s"return parsedJsonTo${actualSelf}(parsed_json);")
           }
         }
       })
