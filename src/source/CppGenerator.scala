@@ -282,9 +282,14 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                       |${w.getCurrentIndent()}json11::Json $name = json11::Json::array({vector_with_json_${name}});""".stripMargin('|')
                 }
                 case MString => s"json11::Json $name = json11::Json($value);"
-                case p: MPrimitive => s"json11::Json $name = json11::Json($value);"
-                case MDate => s"json11::Json $name = json11::Json($value.toString())"
-                case MOptional => s"json11::Json $name = json11::Json($value.value_or(NULL))"
+                case p: MPrimitive => p._idlName match {
+                  case "bool" => s"json11::Json $name = json11::Json($value);"
+                  case "i8" | "i16" | "i32" | "i64" => s"json11::Json $name = json11::Json(static_cast<int>($value));"
+                  case "f32" | "f64" => s"json11::Json $name = json11::Json(static_cast<double>($value));"
+                  case _ => throw new AssertionError("Unreachable")
+                }
+                case MDate => s"json11::Json $name = json11::Json($value.time_since_epoch().count());"
+                case MOptional => s"json11::Json $name = json11::Json($value.value_or(NULL));"
                 case d: MDef => d.defType match {
                   case DRecord => s"json11::Json $name = parsedJsonFrom${marshal.fieldType(expr)}($value);"
                   case _ => throw new AssertionError("Unreachable")
@@ -320,12 +325,15 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                 }
                 case MString => s"${marshal.typename(expr)} $name = $json.string_value();"
                 case p: MPrimitive => p._idlName match {
-                  case "bool" => s"${p.cName} $name =$json.bool_value();"
+                  case "bool" => s"${p.cName} $name = $json.bool_value();"
                   case "i8" | "i16" | "i32" | "i64" => s"${p.cName} $name = static_cast<${p.cName}>($json.int_value());"
                   case "f32" | "f64" => s"${p.cName} $name = static_cast<${p.cName}>($json.number_value());"
                   case _ => throw new AssertionError("Unreachable")
                 }
-                case MDate => s"std::string $name = $json.string_value()"
+                case MDate => {
+                  s"""std::chrono::milliseconds {$name}_in_milliseconds(static_cast<long>($json.int_value()));
+                      |${w.getCurrentIndent()}std::chrono::time_point<system_clock> $name({$name}_in_milliseconds);""".stripMargin('|')
+                }
                 case MOptional => cppFor(expr.args.head, name, json)
                 case d: MDef => d.defType match {
                   case DRecord => s"${marshal.fieldType(expr)} $name = parsedJsonTo${marshal.fieldType(expr)}($json);"
