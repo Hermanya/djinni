@@ -304,7 +304,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
               w.wl(cppFor(f.ty.resolved, name, s"record.$name"))
             }
             val params = r.fields.map((f) => {
-              "{ \"" + idCpp.field(f.ident) + "\", " + idCpp.field(f.ident) + " }"
+              "{ \"" + idJava.method(f.ident) + "\", " + idCpp.field(f.ident) + " }"
             }).mkString(", ")
             w.wl(s"return json11::Json::object({$params});")
           }
@@ -343,8 +343,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
               }
             }
             for (f <- r.fields) {
-              val name = idCpp.field(f.ident)
-              w.wl(cppFor(f.ty.resolved, name, "parsed_json[\"" + name + "\"]"))
+              w.wl(cppFor(f.ty.resolved, idCpp.field(f.ident), "parsed_json[\"" + idJava.method(f.ident) + "\"]"))
             }
             val params = r.fields.map((f) => idCpp.field(f.ident)).mkString(", ")
             w.wl(s"${actualSelf} record ($params);")
