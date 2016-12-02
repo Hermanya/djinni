@@ -58,6 +58,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)helloWorld:(nonnull NSString *)username
+                cb:(nonnull void (^)() *)cb {
+    try {
+        _cppRefHandle.get()->hello_world(::djinni::String::toCpp(username),
+                                         ::djinni::qwerwrFunction<::djinni::I64, ::djinni::String>::toCpp(cb));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto ReverseClientInterface::toCpp(ObjcType objc) -> CppType

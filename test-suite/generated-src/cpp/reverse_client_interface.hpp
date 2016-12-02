@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../../handwritten-src/cpp/optional.hpp"
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -20,6 +21,8 @@ public:
     virtual std::string meth_taking_optional_interface(const std::shared_ptr<ReverseClientInterface> & i) = 0;
 
     static std::shared_ptr<ReverseClientInterface> create();
+
+    virtual void hello_world(const std::string & username, std::function<std::string(int64_t)> cb) = 0;
 };
 
 }  // namespace testsuite

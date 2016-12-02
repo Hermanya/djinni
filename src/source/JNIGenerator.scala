@@ -42,6 +42,7 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
     val cppPrefix = cppPrefixOverride.getOrElse(spec.jniIncludeCppPrefix)
     jniHpp.add("#include " + q(cppPrefix + spec.cppFileIdentStyle(name) + "." + spec.cppHeaderExt))
     jniHpp.add("#include " + q(spec.jniBaseLibIncludePrefix + "djinni_support.hpp"))
+    jniCpp.add("#include \"NativeLambdaInterfaceI64String.hpp\"") // XXX: figure out how to include lambas used
     spec.cppNnHeader match {
       case Some(nnHdr) => jniHpp.add("#include " + nnHdr)
       case _ =>

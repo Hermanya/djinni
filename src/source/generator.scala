@@ -46,6 +46,7 @@ package object generatorTools {
                    cppFileIdentStyle: IdentConverter,
                    cppOptionalTemplate: String,
                    cppOptionalHeader: String,
+                   cppFunctionTemplate: String,
                    cppEnumHashWorkaround: Boolean,
                    cppNnHeader: Option[String],
                    cppNnType: Option[String],

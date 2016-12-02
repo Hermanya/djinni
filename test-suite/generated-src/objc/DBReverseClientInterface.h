@@ -15,4 +15,7 @@
 
 + (nullable DBReverseClientInterface *)create;
 
+- (void)helloWorld:(nonnull NSString *)username
+                cb:(nonnull void (^)() *)cb;
+
 @end

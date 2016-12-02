@@ -3,6 +3,7 @@
 
 #include "NativeWcharTestHelpers.hpp"  // my header
 #include "Marshal.hpp"
+#include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeWcharTestRec.hpp"
 
 namespace djinni_generated {

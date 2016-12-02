@@ -31,6 +31,7 @@ object Main {
     var cppFileIdentStyle: IdentConverter = IdentStyle.underLower
     var cppOptionalTemplate: String = "std::optional"
     var cppOptionalHeader: String = "<optional>"
+    var cppFunctionTemplate: String = "std::function"
     var cppEnumHashWorkaround : Boolean = true
     var cppNnHeader: Option[String] = None
     var cppNnType: Option[String] = None
@@ -247,7 +248,7 @@ object Main {
     } else {
       None
     }
-    val idl = try {
+    val all_idl = try {
       (new Parser).parseFile(idlFile, inFileListWriter)
     }
     catch {
@@ -260,6 +261,10 @@ object Main {
         inFileListWriter.get.close()
       }
     }
+
+    val idl = all_idl.map(td => { td.ident.name })
+      .distinct
+      .flatMap(name => all_idl.find(td => td.ident.name == name))
 
     // Resolve names in IDL file, check types.
     System.out.println("Resolving...")
@@ -298,6 +303,7 @@ object Main {
       cppFileIdentStyle,
       cppOptionalTemplate,
       cppOptionalHeader,
+      cppFunctionTemplate,
       cppEnumHashWorkaround,
       cppNnHeader,
       cppNnType,

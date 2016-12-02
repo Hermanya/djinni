@@ -1,4 +1,5 @@
 #include "reverse_client_interface_impl.hpp"
+#include <iostream>
 
 namespace testsuite {
 
@@ -21,6 +22,11 @@ std::string ReverseClientInterfaceImpl::meth_taking_optional_interface(const std
         return {};
     }
 }
+
+void ReverseClientInterfaceImpl::hello_world(const std::string & username, std::function<std::string(int64_t)> cb) {
+    std::cout << "OMG my god: " << cb(123) << std::endl;
+};
+
 
 std::shared_ptr<ReverseClientInterface> ReverseClientInterface::create() {
     return std::make_shared<ReverseClientInterfaceImpl>();

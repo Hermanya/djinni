@@ -4,6 +4,7 @@
 #include "NativeExternInterface1.hpp"  // my header
 #include "NativeClientInterface.hpp"
 #include "NativeClientReturnedRecord.hpp"
+#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

@@ -134,38 +134,70 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
       refs.java.add("java.util.concurrent.atomic.AtomicBoolean")
     }
 
+    val this_is_lambda_interface = ident.name.startsWith("lambda")
+
+    if (this_is_lambda_interface) {
+      refs.java.add("java.util.function.Function")
+    }
+
     writeJavaFile(ident, origin, refs.java, w => {
       val javaClass = marshal.typename(ident, i)
       val typeParamList = javaTypeParams(typeParams)
+      val maybeAbstract = if (this_is_lambda_interface) { "" } else { "abstract" }
       writeDoc(w, doc)
 
       javaAnnotationHeader.foreach(w.wl)
-      w.w(s"${javaClassAccessModifierString}abstract class $javaClass$typeParamList").braced {
+      w.w(s"$javaClassAccessModifierString$maybeAbstract class $javaClass$typeParamList").braced {
         val skipFirst = SkipFirst()
         generateJavaConstants(w, i.consts)
 
         val throwException = spec.javaCppException.fold("")(" throws " + _)
-        for (m <- i.methods if !m.static) {
-          skipFirst { w.wl }
-          writeDoc(w, m.doc)
-          val ret = marshal.returnType(m.ret)
-          val params = m.params.map(p => {
-            val nullityAnnotation = marshal.nullityAnnotation(p.ty).map(_ + " ").getOrElse("")
-            nullityAnnotation + marshal.paramType(p.ty) + " " + idJava.local(p.ident)
+        if (this_is_lambda_interface) {
+          i.methods.filter(m => m.ident.name == "run").foreach(m => {
+            val params = (m.params.map(p => p.ty) ++ m.ret)
+              .map(marshal.typename)
+              .map(_.capitalize) // XXX: figure out how to get .typename accept needRef, or generate a MLambda here
+              .mkString(", ")
+            w.wl(s"private Function<$params> actualLambda;")
+            w.wl(s"public $javaClass (Function<$params> lambda)").braced {
+              w.wl("super();")
+              w.wl(s"this.actualLambda = lambda;")
+            }
+            val ret = marshal.returnType(m.ret)
+            val run_params = m.params.map(p => {
+              val nullityAnnotation = marshal.nullityAnnotation(p.ty).map(_ + " ").getOrElse("")
+              nullityAnnotation + marshal.paramType(p.ty) + " " + idJava.local(p.ident)
+            })
+            w.wl("public " + ret + " " + idJava.method(m.ident) + run_params.mkString("(", ", ", ")")).braced {
+              //XXX: hardcoded return
+              w.wl(s"return this.actualLambda.apply(${m.params.map(p => idJava.local(p.ident)).mkString(", ")});")
+            }
           })
-          marshal.nullityAnnotation(m.ret).foreach(w.wl)
-          w.wl("public abstract " + ret + " " + idJava.method(m.ident) + params.mkString("(", ", ", ")") + throwException + ";")
-        }
-        for (m <- i.methods if m.static) {
-          skipFirst { w.wl }
-          writeDoc(w, m.doc)
-          val ret = marshal.returnType(m.ret)
-          val params = m.params.map(p => {
-            val nullityAnnotation = marshal.nullityAnnotation(p.ty).map(_ + " ").getOrElse("")
-            nullityAnnotation + marshal.paramType(p.ty) + " " + idJava.local(p.ident)
-          })
-          marshal.nullityAnnotation(m.ret).foreach(w.wl)
-          w.wl("public static native "+ ret + " " + idJava.method(m.ident) + params.mkString("(", ", ", ")") + ";")
+        } else {
+          val throwException = spec.javaCppException.fold("")(" throws " + _)
+          for (m <- i.methods if !m.static) {
+            skipFirst { w.wl }
+            writeDoc(w, m.doc)
+            val ret = marshal.returnType(m.ret)
+            val params = m.params.map(p => {
+              val nullityAnnotation = marshal.nullityAnnotation(p.ty).map(_ + " ").getOrElse("")
+              nullityAnnotation + marshal.paramType(p.ty) + " " + idJava.local(p.ident)
+            })
+            marshal.nullityAnnotation(m.ret).foreach(w.wl)
+            w.wl("public abstract " + ret + " " + idJava.method(m.ident) + params.mkString("(", ", ", ")") + throwException + ";")
+          }
+
+          for (m <- i.methods if m.static) {
+            skipFirst { w.wl }
+            writeDoc(w, m.doc)
+            val ret = marshal.returnType(m.ret)
+            val params = m.params.map(p => {
+              val nullityAnnotation = marshal.nullityAnnotation(p.ty).map(_ + " ").getOrElse("")
+              nullityAnnotation + marshal.paramType(p.ty) + " " + idJava.local(p.ident)
+            })
+            marshal.nullityAnnotation(m.ret).foreach(w.wl)
+            w.wl("public static native "+ ret + " " + idJava.method(m.ident) + params.mkString("(", ", ", ")") + ";")
+          }
         }
         if (i.ext.cpp) {
           w.wl
@@ -190,9 +222,23 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
             }
             for (m <- i.methods if !m.static) { // Static methods not in CppProxy
               val ret = marshal.returnType(m.ret)
-              val returnStmt = m.ret.fold("")(_ => "return ")
+              val returnStmt = m.ret.fold("")(x => if (x.expr.ident.name != "void") { "return " } else {""})
               val params = m.params.map(p => marshal.paramType(p.ty) + " " + idJava.local(p.ident)).mkString(", ")
-              val args = m.params.map(p => idJava.local(p.ident)).mkString(", ")
+              def lambda_class_name (ty: TypeRef): String = {
+                idJava.ty("lambda_interface_" + ty.expr.args.map(t => t.ident.name).mkString("_"))
+              }
+              val args = m.params.map(p => {
+                p.ty.resolved.base match {
+                  case MLambda => s"new ${lambda_class_name(p.ty)}(${idJava.local(p.ident)})"
+                  case _ => idJava.local(p.ident)
+                }
+              }).mkString(", ")
+              val native_params = m.params.map(p => {
+                p.ty.resolved.base match {
+                  case MLambda => s"${lambda_class_name(p.ty)} ${idJava.local(p.ident)}"
+                  case _ => marshal.paramType(p.ty) + " " + idJava.local(p.ident)
+                }
+              }).mkString(", ")
               val meth = idJava.method(m.ident)
               w.wl
               w.wl(s"@Override")
@@ -200,7 +246,7 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
                 w.wl("assert !this.destroyed.get() : \"trying to use a destroyed object\";")
                 w.wl(s"${returnStmt}native_$meth(this.nativeRef${preComma(args)});")
               }
-              w.wl(s"private native $ret native_$meth(long _nativeRef${preComma(params)});")
+              w.wl(s"private native $ret native_$meth(long _nativeRef${preComma(native_params)});")
             }
           }
         }
@@ -282,6 +328,7 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
                   case MOptional =>
                     w.w(s"((this.${idJava.field(f.ident)} == null && other.${idJava.field(f.ident)} == null) || ")
                     w.w(s"(this.${idJava.field(f.ident)} != null && this.${idJava.field(f.ident)}.equals(other.${idJava.field(f.ident)})))")
+                  case MLambda =>
                   case t: MPrimitive => w.w(s"this.${idJava.field(f.ident)} == other.${idJava.field(f.ident)}")
                   case df: MDef => df.defType match {
                     case DRecord => w.w(s"this.${idJava.field(f.ident)}.equals(other.${idJava.field(f.ident)})")
@@ -321,6 +368,7 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
                 // Need to repeat this case for MDef
                 case df: MDef => s"${idJava.field(f.ident)}.hashCode()"
                 case MOptional => s"(${idJava.field(f.ident)} == null ? 0 : ${idJava.field(f.ident)}.hashCode())"
+                case MLambda =>
                 case t: MPrimitive => t.jName match {
                   case "byte" | "short" | "int" => idJava.field(f.ident)
                   case "long" => s"((int) (${idJava.field(f.ident)} ^ (${idJava.field(f.ident)} >>> 32)))"

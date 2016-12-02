@@ -4,6 +4,7 @@
 package com.dropbox.djinni.test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -16,6 +17,8 @@ public abstract class ReverseClientInterface {
 
     @Nonnull
     public abstract String methTakingOptionalInterface(@CheckForNull ReverseClientInterface i);
+
+    public abstract void helloWorld(@Nonnull String username, @Nonnull Function<Long, String> cb);
 
     @CheckForNull
     public static native ReverseClientInterface create();
@@ -66,5 +69,13 @@ public abstract class ReverseClientInterface {
             return native_methTakingOptionalInterface(this.nativeRef, i);
         }
         private native String native_methTakingOptionalInterface(long _nativeRef, ReverseClientInterface i);
+
+        @Override
+        public void helloWorld(String username, Function<Long, String> cb)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_helloWorld(this.nativeRef, username, new LambdaInterfaceI64String(cb));
+        }
+        private native void native_helloWorld(long _nativeRef, String username, LambdaInterfaceI64String cb);
     }
 }

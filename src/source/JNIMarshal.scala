@@ -23,7 +23,14 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
   override def fqFieldType(tm: MExpr): String = fqParamType(tm)
 
   override def toCpp(tm: MExpr, expr: String): String = {
-    s"${helperClass(tm)}::toCpp(jniEnv, $expr)"
+    tm.base match {
+      case MLambda => {
+        // XXX: implement this
+        s"[&](int64_t x) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, $expr)->run(x);}"
+      }
+      case _ => s"${helperClass(tm)}::toCpp(jniEnv, $expr)"
+    }
+
   }
   override def fromCpp(tm: MExpr, expr: String): String = {
     s"${helperClass(tm)}::fromCpp(jniEnv, $expr)"
@@ -70,6 +77,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         case MOptional => throw new AssertionError("nested optional?")
         case m => javaTypeSignature(tm.args.head)
       }
+      case MLambda => "Ljava/util/function/Function"
       case MList => "Ljava/util/ArrayList;"
       case MSet => "Ljava/util/HashSet;"
       case MMap => "Ljava/util/HashMap;"
@@ -95,8 +103,12 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         case "f32" => "F32"
         case "f64" => "F64"
         case "bool" => "Bool"
+        case "void" => "void"
       }
       case MOptional => "Optional"
+      case MLambda => {
+        "Function"
+      }
       case MBinary => "Binary"
       case MString => if (spec.cppUseWideStrings) "WString" else "String"
       case MDate => "Date"

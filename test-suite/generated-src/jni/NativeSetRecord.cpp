@@ -3,6 +3,7 @@
 
 #include "NativeSetRecord.hpp"  // my header
 #include "Marshal.hpp"
+#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

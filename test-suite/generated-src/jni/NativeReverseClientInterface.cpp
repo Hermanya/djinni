@@ -3,6 +3,7 @@
 
 #include "NativeReverseClientInterface.hpp"  // my header
 #include "Marshal.hpp"
+#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 
@@ -56,6 +57,16 @@ CJNIEXPORT jobject JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_c
         auto r = ::testsuite::ReverseClientInterface::create();
         return ::djinni::release(::djinni_generated::NativeReverseClientInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_00024CppProxy_native_1helloWorld(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_username, jobject j_cb)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
+        ref->hello_world(::djinni::String::toCpp(jniEnv, j_username),
+                         [&](int64_t x) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb)->run(x);});
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 }  // namespace djinni_generated

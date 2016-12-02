@@ -4,6 +4,7 @@
 #include "NativeConstantsInterface.hpp"  // my header
 #include "Marshal.hpp"
 #include "NativeConstantRecord.hpp"
+#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

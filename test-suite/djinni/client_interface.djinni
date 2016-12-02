@@ -9,7 +9,7 @@ client_returned_record = record {
 client_interface = interface +j +o {
     # Returns record of given string
     get_record(record_id: i64, utf8string: string, misc: optional<string>): client_returned_record;
-	identifier_check(data: binary, r: i32, jret: i64): f64;
+    identifier_check(data: binary, r: i32, jret: i64): f64;
     return_str(): string;
 
     meth_taking_interface(i: client_interface): string;
@@ -23,4 +23,5 @@ reverse_client_interface = interface +c {
     meth_taking_optional_interface(i: optional<reverse_client_interface>): string;
 
     static create(): reverse_client_interface;
+    hello_world(username: string, cb: lambda<i64, string>);
 }

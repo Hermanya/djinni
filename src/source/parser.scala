@@ -41,7 +41,7 @@ private object IdlParser extends RegexParsers {
 
   def importFile: Parser[FileRef] = {
     
-	def fileParent:String = if (fileStack.top.getParent() != null) return fileStack.top.getParent() + "/" else return ""
+  def fileParent:String = if (fileStack.top.getParent() != null) return fileStack.top.getParent() + "/" else return ""
 
     ("@" ~> directive) ~ ("\"" ~> filePath <~ "\"") ^^ {
       case "import" ~ x =>
@@ -267,7 +267,7 @@ def parseExternFile(externFile: File, inFileListWriter: Option[Writer]) : Seq[Ty
 }
 
 def normalizePath(path: File) : File = {
-  return new File(java.nio.file.Paths.get(path.toString()).normalize().toString())
+  new File(java.nio.file.Paths.get(path.toString()).normalize().toString())
 }
 
 def parseFile(idlFile: File, inFileListWriter: Option[Writer]): Seq[TypeDecl] = {
@@ -299,6 +299,28 @@ def parseFile(idlFile: File, inFileListWriter: Option[Writer]): Seq[TypeDecl] = 
                 types = parseExternFile(normalized, inFileListWriter) ++ types
             }
           }
+        })
+        types = types ++ types.flatMap(t => t.body match {
+          case i: Interface =>
+            i.methods.flatMap(m => {
+              (m.params.map(f => f.ty) ++ m.ret)
+                .filter(t => t.expr.ident.name == "lambda")
+                  .map(t => {
+                    val file = fileStack.top
+                    val loc = Loc(file, 0, 0)
+                    var index = 0
+                    val params = t.expr.args.dropRight(1).map((t) => {
+                      index = index + 1
+                      Field(Ident(s"param_$index", file, loc), TypeRef(t), Doc(List("doc")))
+                    })
+                    val interface_id = Ident(s"lambda_interface_${t.expr.args.map(t => t.ident.name).mkString("_")}", file, loc)
+                    val return_value = Option(TypeRef(t.expr.args.takeRight(1).head))
+                    val run = Method(Ident("run", file, loc), params, return_value, Doc(List("doc")), false, false)
+                    val interface = Interface(Ext(true, false, false), List(run), List())
+                    InternTypeDecl(interface_id, List(), interface, Doc(List("doc")), "")
+                  })
+            })
+          case _ => List()
         })
         types
       }

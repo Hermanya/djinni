@@ -3,6 +3,7 @@
 
 #include "NativeListenerCaller.hpp"  // my header
 #include "NativeFirstListener.hpp"
+#include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeSecondListener.hpp"
 
 namespace djinni_generated {
