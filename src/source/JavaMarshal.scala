@@ -30,7 +30,7 @@ class JavaMarshal(spec: Spec) extends Marshal(spec) {
   def references(m: Meta): Seq[SymbolReference] = m match {
     case o: MOpaque =>
       o match {
-        case MLambda => List(ImportRef("java.util.function.Function"))
+        case MLambda => List(ImportRef("java.util.function.*"))
         case MList => List(ImportRef("java.util.ArrayList"))
         case MSet => List(ImportRef("java.util.HashSet"))
         case MMap => List(ImportRef("java.util.HashMap"))
@@ -68,7 +68,7 @@ class JavaMarshal(spec: Spec) extends Marshal(spec) {
   }
 
   private def toJavaType(tm: MExpr, packageName: Option[String]): String = {
-    def args(tm: MExpr) = if (tm.args.isEmpty) "" else tm.args.map(f(_, true)).mkString("<", ", ", ">")
+    def args(tm: MExpr) = if (tm.args.isEmpty) "" else tm.args.map(f(_, true)).filter(t => t != "Void").mkString("<", ", ", ">")
     def f(tm: MExpr, needRef: Boolean): String = {
       tm.base match {
         case MOptional =>
@@ -88,7 +88,28 @@ class JavaMarshal(spec: Spec) extends Marshal(spec) {
             case MDate => "Date"
             case MBinary => "byte[]"
             case MOptional => throw new AssertionError("optional should have been special cased")
-            case MLambda => "Function"
+            case MLambda => {
+              val args = tm.args.dropRight(1)
+              def lambda_that_returns () : String = {
+                args.size match {
+                  case 0 => "Supplier"
+                  case 1 => "Function"
+                  case 2 => "BiFunction"
+                  case _ => throw new AssertionError(s"Java does not support lambdas with that ${args.size} of args")
+                }
+              }
+              tm.args.takeRight(1).head.base match {
+                case p: MPrimitive => p.idlName match {
+                  case "void" => args.size match {
+                    case 1 => "Consumer"
+                    case 2 => "BiConsumer"
+                    case _ => throw new AssertionError(s"Java does not support lambdas with that ${args.size} of args")
+                  }
+                  case _ => lambda_that_returns()
+                }
+                case _ => lambda_that_returns()
+              }
+            }
             case MList => "ArrayList"
             case MSet => "HashSet"
             case MMap => "HashMap"

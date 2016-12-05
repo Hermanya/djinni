@@ -15,7 +15,8 @@
 
 + (nullable DBReverseClientInterface *)create;
 
-- (void)helloWorld:(nonnull NSString *)username
-                cb:(nonnull void (^)() *)cb;
+- (void)takeLambdaWhichReturnsNothing:(nonnull void (^)() *)cb;
+
+- (void)takeLambdaWhichReturnsString:(nonnull void (^)() *)cb;
 
 @end

@@ -13,7 +13,8 @@ class ReverseClientInterfaceImpl : public ReverseClientInterface {
 
     virtual std::string meth_taking_optional_interface(const std::shared_ptr<ReverseClientInterface> & i) override;
 
-    virtual void hello_world(const std::string & username, std::function<std::string(int64_t)> cb) override;
+    virtual void take_lambda_which_returns_nothing(std::function<void(int64_t)> cb) override;
+    virtual void take_lambda_which_returns_string(std::function<std::string(int64_t)> cb) override;
 
     static std::shared_ptr<ReverseClientInterface> create();
 };

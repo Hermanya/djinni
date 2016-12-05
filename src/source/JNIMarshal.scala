@@ -110,9 +110,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         case "void" => "void"
       }
       case MOptional => "Optional"
-      case MLambda => {
-        "Function"
-      }
+      case MLambda => throw new AssertionError("unreachable")
       case MBinary => "Binary"
       case MString => if (spec.cppUseWideStrings) "WString" else "String"
       case MDate => "Date"

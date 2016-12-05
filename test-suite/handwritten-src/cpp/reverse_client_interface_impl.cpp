@@ -23,7 +23,11 @@ std::string ReverseClientInterfaceImpl::meth_taking_optional_interface(const std
     }
 }
 
-void ReverseClientInterfaceImpl::hello_world(const std::string & username, std::function<std::string(int64_t)> cb) {
+void ReverseClientInterfaceImpl::take_lambda_which_returns_nothing(std::function<void(int64_t)> cb) {
+    cb(123);
+};
+
+void ReverseClientInterfaceImpl::take_lambda_which_returns_string(std::function<std::string(int64_t)> cb) {
     cb(123);
 };
 

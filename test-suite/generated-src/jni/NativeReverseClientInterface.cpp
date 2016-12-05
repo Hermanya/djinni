@@ -4,6 +4,7 @@
 #include "NativeReverseClientInterface.hpp"  // my header
 #include "Marshal.hpp"
 #include "NativeLambdaInterfaceI64String.hpp"
+#include "NativeLambdaInterfaceI64Void.hpp"
 
 namespace djinni_generated {
 
@@ -59,13 +60,21 @@ CJNIEXPORT jobject JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_c
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_00024CppProxy_native_1helloWorld(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_username, jobject j_cb)
+CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_00024CppProxy_native_1takeLambdaWhichReturnsNothing(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_cb)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
-        ref->hello_world(::djinni::String::toCpp(jniEnv, j_username),
-                         [&](int64_t param_0) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb)->run(param_0);});
+        ref->take_lambda_which_returns_nothing([&](int64_t param_0) { ::djinni_generated::NativeLambdaInterfaceI64Void::toCpp(jniEnv, j_cb)->run(param_0);});
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_00024CppProxy_native_1takeLambdaWhichReturnsString(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_cb)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
+        ref->take_lambda_which_returns_string([&](int64_t param_0) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb)->run(param_0);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

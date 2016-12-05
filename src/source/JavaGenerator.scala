@@ -136,8 +136,25 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
 
     val this_is_lambda_interface = ident.name.startsWith("lambda")
 
+    var lambda_type = "set if this_is_lambda_interface"
     if (this_is_lambda_interface) {
-      refs.java.add("java.util.function.Function")
+
+      i.methods.filter(m => m.ident.name == "run").map(m => {
+        lambda_type = m.ret match {
+          case Some(typeRef) => m.params.size match {
+            case 0 => "Supplier"
+            case 1 => "Function"
+            case 2 => "BiFunction"
+            case _ => throw new AssertionError(s"Java does not support lambdas with that ${m.params.size} of args")
+          }
+          case None => m.params.size match {
+            case 1 => "Consumer"
+            case 2 => "BiConsumer"
+            case _ => throw new AssertionError(s"Java does not support lambdas with that ${m.params.size} of args")
+          }
+        }
+        refs.java.add(s"java.util.function.$lambda_type")
+      })
     }
 
     writeJavaFile(ident, origin, refs.java, w => {
@@ -158,8 +175,9 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
               .map(marshal.typename)
               .map(_.capitalize) // XXX: figure out how to get .typename accept needRef, or generate a MLambda here
               .mkString(", ")
-            w.wl(s"private Function<$params> actualLambda;")
-            w.wl(s"public $javaClass (Function<$params> lambda)").braced {
+
+            w.wl(s"private $lambda_type<$params> actualLambda;")
+            w.wl(s"public $javaClass ($lambda_type<$params> lambda)").braced {
               w.wl("super();")
               w.wl(s"this.actualLambda = lambda;")
             }
@@ -168,9 +186,21 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
               val nullityAnnotation = marshal.nullityAnnotation(p.ty).map(_ + " ").getOrElse("")
               nullityAnnotation + marshal.paramType(p.ty) + " " + idJava.local(p.ident)
             })
-            w.wl("public " + ret + " " + idJava.method(m.ident) + run_params.mkString("(", ", ", ")")).braced {
-              //XXX: hardcoded return
-              w.wl(s"return this.actualLambda.apply(${m.params.map(p => idJava.local(p.ident)).mkString(", ")});")
+            val method = lambda_type match {
+              case "Consumer" | "BiConsumer" => "accept"
+              case _ => "apply"
+            }
+            m.ret match {
+              case Some(typeRef) => {
+                w.wl("public " + marshal.returnType(m.ret) + " " + idJava.method(m.ident) + run_params.mkString("(", ", ", ")")).braced {
+                  w.wl(s"return this.actualLambda.$method(${m.params.map(p => idJava.local(p.ident)).mkString(", ")});")
+                }
+              }
+              case None => {
+                w.wl("public void " + idJava.method(m.ident) + run_params.mkString("(", ", ", ")")).braced {
+                  w.wl(s"this.actualLambda.$method(${m.params.map(p => idJava.local(p.ident)).mkString(", ")});")
+                }
+              }
             }
           })
         } else {

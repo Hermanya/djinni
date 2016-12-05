@@ -23,5 +23,6 @@ reverse_client_interface = interface +c {
     meth_taking_optional_interface(i: optional<reverse_client_interface>): string;
 
     static create(): reverse_client_interface;
-    hello_world(username: string, cb: lambda<i64, string>);
+    take_lambda_which_returns_nothing(cb: lambda<i64, void>);
+    take_lambda_which_returns_string(cb: lambda<i64, string>);
 }

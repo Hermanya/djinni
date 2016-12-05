@@ -4,7 +4,7 @@
 package com.dropbox.djinni.test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import java.util.function.*;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -18,7 +18,9 @@ public abstract class ReverseClientInterface {
     @Nonnull
     public abstract String methTakingOptionalInterface(@CheckForNull ReverseClientInterface i);
 
-    public abstract void helloWorld(@Nonnull String username, @Nonnull Function<Long, String> cb);
+    public abstract void takeLambdaWhichReturnsNothing(@Nonnull Consumer<Long> cb);
+
+    public abstract void takeLambdaWhichReturnsString(@Nonnull Function<Long, String> cb);
 
     @CheckForNull
     public static native ReverseClientInterface create();
@@ -71,11 +73,19 @@ public abstract class ReverseClientInterface {
         private native String native_methTakingOptionalInterface(long _nativeRef, ReverseClientInterface i);
 
         @Override
-        public void helloWorld(String username, Function<Long, String> cb)
+        public void takeLambdaWhichReturnsNothing(Consumer<Long> cb)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_helloWorld(this.nativeRef, username, new LambdaInterfaceI64String(cb));
+            native_takeLambdaWhichReturnsNothing(this.nativeRef, new LambdaInterfaceI64Void(cb));
         }
-        private native void native_helloWorld(long _nativeRef, String username, LambdaInterfaceI64String cb);
+        private native void native_takeLambdaWhichReturnsNothing(long _nativeRef, LambdaInterfaceI64Void cb);
+
+        @Override
+        public void takeLambdaWhichReturnsString(Function<Long, String> cb)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_takeLambdaWhichReturnsString(this.nativeRef, new LambdaInterfaceI64String(cb));
+        }
+        private native void native_takeLambdaWhichReturnsString(long _nativeRef, LambdaInterfaceI64String cb);
     }
 }
