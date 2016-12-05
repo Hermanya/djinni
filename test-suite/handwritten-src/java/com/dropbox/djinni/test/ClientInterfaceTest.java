@@ -28,6 +28,9 @@ public class ClientInterfaceTest extends TestCase {
 
         assertEquals(i.methTakingInterface(i), "test");
         assertEquals(i.methTakingOptionalInterface(i), "test");
-        i.helloWorld("herman", x -> x.toString() + ", right?");
+        i.helloWorld("herman", x -> {
+            assertEquals(x.longValue(), 123);
+            return "ok";
+        });
     }
 }

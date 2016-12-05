@@ -3,7 +3,6 @@
 
 #include "NativeExternInterface2.hpp"  // my header
 #include "NativeExternRecordWithDerivings.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeTestHelpers.hpp"
 
 namespace djinni_generated {

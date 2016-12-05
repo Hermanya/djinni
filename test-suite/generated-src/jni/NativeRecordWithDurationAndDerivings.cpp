@@ -4,7 +4,6 @@
 #include "NativeRecordWithDurationAndDerivings.hpp"  // my header
 #include "Duration-jni.hpp"
 #include "Marshal.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

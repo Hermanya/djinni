@@ -42,7 +42,6 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
     val cppPrefix = cppPrefixOverride.getOrElse(spec.jniIncludeCppPrefix)
     jniHpp.add("#include " + q(cppPrefix + spec.cppFileIdentStyle(name) + "." + spec.cppHeaderExt))
     jniHpp.add("#include " + q(spec.jniBaseLibIncludePrefix + "djinni_support.hpp"))
-    jniCpp.add("#include \"NativeLambdaInterfaceI64String.hpp\"") // XXX: figure out how to include lambas used
     spec.cppNnHeader match {
       case Some(nnHdr) => jniHpp.add("#include " + nnHdr)
       case _ =>
@@ -168,7 +167,7 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
         writeAlignedCall(w, "return {", r.fields, "}", f => {
           val fieldId = "data.field_" + idJava.field(f.ident)
           val jniFieldAccess = toJniCall(f.ty, (jt: String) => s"jniEnv->Get${jt}Field(j, $fieldId)")
-          jniMarshal.toCpp(f.ty, jniFieldAccess)
+          jniMarshal.toCpp(f.ty, jniFieldAccess, cppMarshal)
         })
         w.wl(";")
       }
@@ -181,6 +180,10 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
     i.methods.foreach(m => {
       m.params.foreach(p => refs.find(p.ty))
       m.ret.foreach(refs.find)
+      (m.params.map(p => p.ty) ++ m.ret).filter(ty => ty.expr.ident.name == "lambda").map(ty => {
+        val ofType = idJava.ty(ty.expr.args.map(a => a.ident.name).mkString("_"))
+        refs.jniCpp.add("#include \"NativeLambdaInterface" + ofType + ".hpp\"")
+      })
     })
     i.consts.foreach(c => {
       refs.find(c.ty)
@@ -302,11 +305,11 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
                   val javaParamsString: String = javaParams.mkString("(", ",", ")")
                   val functionString: String = s"${javaMarshal.fqTypename(ident, i)}#$javaMethodName$javaParamsString"
                   w.wl(s"""DJINNI_ASSERT_MSG(jret, jniEnv, "Got unexpected null return value from function $functionString");""")
-                  w.wl(s"return ${jniMarshal.toCpp(ty, "jret")};")
+                  w.wl(s"return ${jniMarshal.toCpp(ty, "jret", cppMarshal)};")
                 }
                 case _ =>
               }
-              w.wl(s"return ${jniMarshal.toCpp(ty, "jret")};")
+              w.wl(s"return ${jniMarshal.toCpp(ty, "jret", cppMarshal)};")
             })
           }
         }
@@ -362,7 +365,7 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
             val methodName = idCpp.method(m.ident)
             val ret = m.ret.fold("")(r => "auto r = ")
             val call = if (m.static) s"$cppSelf::$methodName(" else s"ref->$methodName("
-            writeAlignedCall(w, ret + call, m.params, ")", p => jniMarshal.toCpp(p.ty, "j_" + idJava.local(p.ident)))
+            writeAlignedCall(w, ret + call, m.params, ")", p => jniMarshal.toCpp(p.ty, "j_" + idJava.local(p.ident), cppMarshal))
             w.wl(";")
             m.ret.fold()(r => w.wl(s"return ::djinni::release(${jniMarshal.fromCpp(r, "r")});"))
           })

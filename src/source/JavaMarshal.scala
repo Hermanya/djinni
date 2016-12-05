@@ -24,7 +24,7 @@ class JavaMarshal(spec: Spec) extends Marshal(spec) {
   override def fieldType(tm: MExpr): String = typename(tm)
   override def fqFieldType(tm: MExpr): String = fqTypename(tm)
 
-  override def toCpp(tm: MExpr, expr: String): String = throw new AssertionError("direct java to cpp conversion not possible")
+  override def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = throw new AssertionError("direct java to cpp conversion not possible")
   override def fromCpp(tm: MExpr, expr: String): String = throw new AssertionError("direct cpp to java conversion not possible")
 
   def references(m: Meta): Seq[SymbolReference] = m match {

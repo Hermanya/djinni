@@ -4,7 +4,6 @@
 #include "NativeConflictUser.hpp"  // my header
 #include "Marshal.hpp"
 #include "NativeConflict.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

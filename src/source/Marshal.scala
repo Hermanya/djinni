@@ -30,8 +30,8 @@ abstract class Marshal(spec: Spec) {
   def fqFieldType(tm: MExpr): String
   def fqFieldType(ty: TypeRef): String = fqFieldType(ty.resolved)
   // Generate code for an expression that transforms an expression `expr` of the non-C++ type `tm` to its C++ counterpart
-  def toCpp(tm: MExpr, expr: String): String = ""
-  def toCpp(ty: TypeRef, expr: String): String = toCpp(ty.resolved, expr)
+  def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = ""
+  def toCpp(ty: TypeRef, expr: String, cppMarshal: CppMarshal): String = toCpp(ty.resolved, expr, cppMarshal)
   // Generate code for an expression that transforms an expression `expr` of the C++ type `tm` to its non-C++ counterpart
   def fromCpp(tm: MExpr, expr: String): String = ""
   def fromCpp(ty: TypeRef, expr: String): String = fromCpp(ty.resolved, expr)

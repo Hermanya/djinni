@@ -3,7 +3,6 @@
 
 #include "NativeExternRecordWithDerivings.hpp"  // my header
 #include "NativeColor.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeRecordWithDerivings.hpp"
 
 namespace djinni_generated {

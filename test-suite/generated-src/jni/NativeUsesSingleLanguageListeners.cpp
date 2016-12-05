@@ -3,7 +3,6 @@
 
 #include "NativeUsesSingleLanguageListeners.hpp"  // my header
 #include "NativeJavaOnlyListener.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeObjcOnlyListener.hpp"
 
 namespace djinni_generated {

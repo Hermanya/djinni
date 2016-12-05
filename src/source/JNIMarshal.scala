@@ -22,12 +22,19 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
   override def fieldType(tm: MExpr): String = paramType(tm)
   override def fqFieldType(tm: MExpr): String = fqParamType(tm)
 
-  override def toCpp(tm: MExpr, expr: String): String = {
+  override def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = {
     tm.base match {
-      case MLambda => {
-        // XXX: implement this
-        s"[&](int64_t x) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, $expr)->run(x);}"
-      }
+      case MLambda =>
+        val ret = tm.args.takeRight(1).map(cppMarshal.typename).head
+        val params = tm.args.dropRight(1).map(cppMarshal.typename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
+        val args = tm.args.dropRight(1).zipWithIndex.map({ case (_, i) => s"param_$i" }).mkString(",")
+
+        val methodName = idJava.ty(s"native_lambda_interface_${tm.args.map(arg => helperNameWithoutNamespace(arg.base)).mkString("_")}")
+        if (ret == "void") {
+          s"[&]($params) { ::${spec.jniNamespace}::$methodName::toCpp(jniEnv, $expr)->run($args);}"
+        } else {
+          s"[&]($params) -> $ret { return ::${spec.jniNamespace}::$methodName::toCpp(jniEnv, $expr)->run($args);}"
+        }
       case _ => s"${helperClass(tm)}::toCpp(jniEnv, $expr)"
     }
 
@@ -91,10 +98,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
     params.map(f => typename(f.ty)).mkString("(", "", ")") + ret.fold("V")(typename)
   }
 
-  def helperName(tm: MExpr): String = tm.base match {
-    case d: MDef => withNs(Some(spec.jniNamespace), helperClass(d.name))
-    case e: MExtern => e.jni.translator
-    case o => withNs(Some("djinni"), o match {
+  def helperNameWithoutNamespace(info:Meta): String = info match {
       case p: MPrimitive => p.idlName match {
         case "i8" => "I8"
         case "i16" => "I16"
@@ -118,7 +122,12 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
       case d: MDef => throw new AssertionError("unreachable")
       case e: MExtern => throw new AssertionError("unreachable")
       case p: MParam => throw new AssertionError("not applicable")
-    })
+  }
+
+  def helperName(tm: MExpr): String = tm.base match {
+    case d: MDef => withNs(Some(spec.jniNamespace), helperClass(d.name))
+    case e: MExtern => e.jni.translator
+    case o => withNs(Some("djinni"), helperNameWithoutNamespace(o))
   }
 
   private def helperTemplates(tm: MExpr): String = {

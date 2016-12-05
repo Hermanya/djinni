@@ -189,7 +189,7 @@ class ObjcppGenerator(spec: Spec) extends BaseObjcGenerator(spec) {
               })
               val ret = m.ret.fold("")(_ => "auto objcpp_result_ = ")
               val call = ret + (if (!m.static) "_cppRefHandle.get()->" else cppSelf + "::") + idCpp.method(m.ident) + "("
-              writeAlignedCall(w, call, m.params, ")", p => objcppMarshal.toCpp(p.ty, idObjc.local(p.ident.name)))
+              writeAlignedCall(w, call, m.params, ")", p => objcppMarshal.toCpp(p.ty, idObjc.local(p.ident.name), cppMarshal))
 
               w.wl(";")
               m.ret.fold()(r => w.wl(s"return ${objcppMarshal.fromCpp(r, "objcpp_result_")};"))
@@ -233,7 +233,7 @@ class ObjcppGenerator(spec: Spec) extends BaseObjcGenerator(spec) {
                         w.wl(s"""throw std::invalid_argument("$exceptionReason");""")
                       }
                     }
-                    w.wl(s"return ${objcppMarshal.toCpp(ty, "objcpp_result_")};")
+                    w.wl(s"return ${objcppMarshal.toCpp(ty, "objcpp_result_", cppMarshal)};")
                   })
                 }
               }
@@ -360,7 +360,7 @@ class ObjcppGenerator(spec: Spec) extends BaseObjcGenerator(spec) {
           w.wl("assert(obj);")
           if(r.fields.isEmpty) w.wl("(void)obj; // Suppress warnings in relase builds for empty records")
           val call = "return CppType("
-          writeAlignedCall(w, "return {", r.fields, "}", f => objcppMarshal.toCpp(f.ty, "obj." + idObjc.field(f.ident)))
+          writeAlignedCall(w, "return {", r.fields, "}", f => objcppMarshal.toCpp(f.ty, "obj." + idObjc.field(f.ident), cppMarshal))
           w.wl(";")
         }
         w.wl

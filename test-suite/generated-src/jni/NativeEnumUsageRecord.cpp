@@ -4,7 +4,6 @@
 #include "NativeEnumUsageRecord.hpp"  // my header
 #include "Marshal.hpp"
 #include "NativeColor.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

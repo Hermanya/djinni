@@ -65,7 +65,7 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
         ref->hello_world(::djinni::String::toCpp(jniEnv, j_username),
-                         [&](int64_t x) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb)->run(x);});
+                         [&](int64_t param_0) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb)->run(param_0);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -44,7 +44,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
   override def fieldType(tm: MExpr): String = typename(tm)
   override def fqFieldType(tm: MExpr): String = fqTypename(tm)
 
-  override def toCpp(tm: MExpr, expr: String): String = throw new AssertionError("cpp to cpp conversion")
+  override def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = throw new AssertionError("cpp to cpp conversion")
   override def fromCpp(tm: MExpr, expr: String): String = throw new AssertionError("cpp to cpp conversion")
 
   def hppReferences(m: Meta, exclude: String, forwardDeclareOnly: Boolean): Seq[SymbolReference] = m match {

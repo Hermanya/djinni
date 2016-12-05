@@ -3,7 +3,6 @@
 
 #include "NativeRecordUsingExtendedRecord.hpp"  // my header
 #include "NativeExtendedRecord.hpp"
-#include "NativeLambdaInterfaceI64String.hpp"
 
 namespace djinni_generated {
 

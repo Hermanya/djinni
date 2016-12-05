@@ -24,7 +24,7 @@ std::string ReverseClientInterfaceImpl::meth_taking_optional_interface(const std
 }
 
 void ReverseClientInterfaceImpl::hello_world(const std::string & username, std::function<std::string(int64_t)> cb) {
-    std::cout << "OMG my god: " << cb(123) << std::endl;
+    cb(123);
 };
 
 
