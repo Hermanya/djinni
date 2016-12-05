@@ -304,7 +304,7 @@ def parseFile(idlFile: File, inFileListWriter: Option[Writer]): Seq[TypeDecl] = 
           case i: Interface =>
             i.methods.flatMap(m => {
               (m.params.map(f => f.ty) ++ m.ret)
-                .filter(t => t.expr.ident.name == "lambda")
+                .filter(t => List("nullary_lambda", "unary_lambda", "binary_lambda").contains(t.expr.ident.name))
                   .map(t => {
                     val file = fileStack.top
                     val loc = Loc(file, 0, 0)

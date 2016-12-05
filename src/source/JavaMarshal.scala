@@ -30,7 +30,7 @@ class JavaMarshal(spec: Spec) extends Marshal(spec) {
   def references(m: Meta): Seq[SymbolReference] = m match {
     case o: MOpaque =>
       o match {
-        case MLambda => List(ImportRef("java.util.function.*"))
+        case MNullaryLambda | MUnaryLambda | MBinaryLambda => List(ImportRef("java.util.function.*"))
         case MList => List(ImportRef("java.util.ArrayList"))
         case MSet => List(ImportRef("java.util.HashSet"))
         case MMap => List(ImportRef("java.util.HashMap"))
@@ -88,7 +88,7 @@ class JavaMarshal(spec: Spec) extends Marshal(spec) {
             case MDate => "Date"
             case MBinary => "byte[]"
             case MOptional => throw new AssertionError("optional should have been special cased")
-            case MLambda => {
+            case MNullaryLambda | MUnaryLambda | MBinaryLambda => {
               val args = tm.args.dropRight(1)
               def lambda_that_returns () : String = {
                 args.size match {

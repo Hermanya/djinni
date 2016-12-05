@@ -31,6 +31,9 @@ void ReverseClientInterfaceImpl::take_lambda_which_returns_string(std::function<
     cb(123);
 };
 
+void ReverseClientInterfaceImpl::take_binary_lambda_which_returns_nothing(std::function<void(int64_t, std::string)> cb) {
+    cb(123, "omg");
+};
 
 std::shared_ptr<ReverseClientInterface> ReverseClientInterface::create() {
     return std::make_shared<ReverseClientInterfaceImpl>();

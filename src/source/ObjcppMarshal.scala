@@ -73,7 +73,7 @@ class ObjcppMarshal(spec: Spec) extends Marshal(spec) {
         case "void" => "void"
       }
       case MOptional => "Optional"
-      case MLambda => "qwerwrFunction"
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda => "qwerwrFunction"
       case MBinary => "Binary"
       case MDate => "Date"
       case MString => if (spec.cppUseWideStrings) "WString" else "String"

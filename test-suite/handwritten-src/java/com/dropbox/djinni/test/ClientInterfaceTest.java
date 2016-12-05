@@ -36,5 +36,9 @@ public class ClientInterfaceTest extends TestCase {
             assertEquals(x.longValue(), 123);
             return "test";
         });
+        i.takeBinaryLambdaWhichReturnsNothing((x, y) -> {
+            assertEquals(x.longValue(), 123);
+            assertEquals(y, "omg");
+        });
     }
 }

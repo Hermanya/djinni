@@ -15,6 +15,7 @@ class ReverseClientInterfaceImpl : public ReverseClientInterface {
 
     virtual void take_lambda_which_returns_nothing(std::function<void(int64_t)> cb) override;
     virtual void take_lambda_which_returns_string(std::function<std::string(int64_t)> cb) override;
+    virtual void take_binary_lambda_which_returns_nothing(std::function<void(int64_t, std::string)> cb) override;
 
     static std::shared_ptr<ReverseClientInterface> create();
 };

@@ -79,10 +79,9 @@ case object MString extends MOpaque { val numParams = 0; val idlName = "string" 
 case object MDate extends MOpaque { val numParams = 0; val idlName = "date" }
 case object MBinary extends MOpaque { val numParams = 0; val idlName = "binary" }
 case object MOptional extends MOpaque { val numParams = 1; val idlName = "optional" }
-case object MLambda extends MOpaque { val numParams = 2; val idlName = "lambda" }
-//case object MNullaryFunction extends MOpaque { val numParams = 1; val idlName = "function_with_no_parameters" }
-//case object MUnaryFunction extends MOpaque { val numParams = 2; val idlName = "function_with_one_parameter" }
-//case object MBinaryFunction extends MOpaque { val numParams = 3; val idlName = "function_with_two_parameters" }
+case object MNullaryLambda extends MOpaque { val numParams = 1; val idlName = "lambda_with_no_parameters" }
+case object MUnaryLambda extends MOpaque { val numParams = 2; val idlName = "lambda_with_one_parameter" }
+case object MBinaryLambda extends MOpaque { val numParams = 3; val idlName = "lambda_with_two_parameters" }
 case object MList extends MOpaque { val numParams = 1; val idlName = "list" }
 case object MSet extends MOpaque { val numParams = 1; val idlName = "set" }
 case object MMap extends MOpaque { val numParams = 2; val idlName = "map" }
@@ -99,7 +98,9 @@ val defaults: Map[String,MOpaque] = immutable.HashMap(
   ("string", MString),
   ("binary", MBinary),
   ("optional", MOptional),
-  ("lambda", MLambda),
+  ("nullary_lambda", MNullaryLambda),
+  ("unary_lambda", MUnaryLambda),
+  ("binary_lambda", MBinaryLambda),
   ("date", MDate),
   ("list", MList),
   ("set", MSet),

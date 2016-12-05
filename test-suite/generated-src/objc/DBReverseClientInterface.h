@@ -19,4 +19,6 @@
 
 - (void)takeLambdaWhichReturnsString:(nonnull void (^)() *)cb;
 
+- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void (^)() *)cb;
+
 @end

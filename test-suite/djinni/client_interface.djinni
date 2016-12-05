@@ -23,6 +23,8 @@ reverse_client_interface = interface +c {
     meth_taking_optional_interface(i: optional<reverse_client_interface>): string;
 
     static create(): reverse_client_interface;
-    take_lambda_which_returns_nothing(cb: lambda<i64, void>);
-    take_lambda_which_returns_string(cb: lambda<i64, string>);
+    take_lambda_which_returns_nothing(cb: unary_lambda<i64, void>);
+    take_lambda_which_returns_string(cb: unary_lambda<i64, string>);
+
+    take_binary_lambda_which_returns_nothing(cb: binary_lambda<i64, string, void>);
 }

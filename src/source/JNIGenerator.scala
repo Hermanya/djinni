@@ -180,7 +180,7 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
     i.methods.foreach(m => {
       m.params.foreach(p => refs.find(p.ty))
       m.ret.foreach(refs.find)
-      (m.params.map(p => p.ty) ++ m.ret).filter(ty => ty.expr.ident.name == "lambda").map(ty => {
+      (m.params.map(p => p.ty) ++ m.ret).filter(ty => List("nullary_lambda", "unary_lambda", "binary_lambda").contains(ty.expr.ident.name)).map(ty => {
         val ofType = idJava.ty(ty.expr.args.map(a => a.ident.name).mkString("_"))
         refs.jniCpp.add("#include \"NativeLambdaInterface" + ofType + ".hpp\"")
       })

@@ -56,7 +56,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
     case MDate => List(ImportRef("<chrono>"))
     case MBinary => List(ImportRef("<vector>"), ImportRef("<cstdint>"))
     case MOptional => List(ImportRef(spec.cppOptionalHeader))
-    case MLambda => List()
+    case MNullaryLambda | MUnaryLambda | MBinaryLambda => List()
     case MList => List(ImportRef("<vector>"))
     case MSet => List(ImportRef("<unordered_set>"))
     case MMap => List(ImportRef("<unordered_map>"))
@@ -153,7 +153,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
       case MDate => "std::chrono::system_clock::time_point"
       case MBinary => "std::vector<uint8_t>"
       case MOptional => spec.cppOptionalTemplate
-      case MLambda => spec.cppFunctionTemplate
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda => spec.cppFunctionTemplate
       case MList => "std::vector"
       case MSet => "std::unordered_set"
       case MMap => "std::unordered_map"
@@ -197,9 +197,9 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
         if (isOptionalInterface(tm)) {
           // otherwise, interfaces are always plain old shared_ptr
           expr(tm.args.head)
-        } else if (tm.base == MLambda) {
+        } else if (tm.base == MNullaryLambda || tm.base == MUnaryLambda || tm.base == MBinaryLambda) {
           val param_types = tm.args.map(expr)
-          s"${base(tm.base)}<${param_types.tail.mkString}(${param_types.dropRight(1).mkString(", ")})>"
+          s"${base(tm.base)}<${param_types.takeRight(1).head}(${param_types.dropRight(1).mkString(", ")})>"
         } else {
           val args = if (tm.args.isEmpty) "" else tm.args.map(expr).mkString("<", ", ", ">")
           base(tm.base) + args
@@ -220,7 +220,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
       case DEnum => true
       case DRecord => e.cpp.byValue
     }
-    case MOptional | MLambda => byValue(tm.args.head)
+    case MOptional | MNullaryLambda | MUnaryLambda | MBinaryLambda => byValue(tm.args.head)
     case _ => false
   }
 

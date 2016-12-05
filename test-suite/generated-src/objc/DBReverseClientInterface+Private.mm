@@ -70,6 +70,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void (^)() *)cb {
+    try {
+        _cppRefHandle.get()->take_binary_lambda_which_returns_nothing(::djinni::qwerwrFunction<::djinni::I64, ::djinni::String, ::djinni::void>::toCpp(cb));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto ReverseClientInterface::toCpp(ObjcType objc) -> CppType

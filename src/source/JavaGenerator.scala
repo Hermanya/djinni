@@ -173,7 +173,7 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
           i.methods.filter(m => m.ident.name == "run").foreach(m => {
             val params = (m.params.map(p => p.ty) ++ m.ret)
               .map(marshal.typename)
-              .map(_.capitalize) // XXX: figure out how to get .typename accept needRef, or generate a MLambda here
+              .map(_.capitalize) // XXX: figure out how to get .typename accept needRef, or generate a MNullaryLambda | MUnaryLambda | MBinaryLambda here
               .mkString(", ")
 
             w.wl(s"private $lambda_type<$params> actualLambda;")
@@ -259,13 +259,13 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
               }
               val args = m.params.map(p => {
                 p.ty.resolved.base match {
-                  case MLambda => s"new ${lambda_class_name(p.ty)}(${idJava.local(p.ident)})"
+                  case MNullaryLambda | MUnaryLambda | MBinaryLambda => s"new ${lambda_class_name(p.ty)}(${idJava.local(p.ident)})"
                   case _ => idJava.local(p.ident)
                 }
               }).mkString(", ")
               val native_params = m.params.map(p => {
                 p.ty.resolved.base match {
-                  case MLambda => s"${lambda_class_name(p.ty)} ${idJava.local(p.ident)}"
+                  case MNullaryLambda | MUnaryLambda | MBinaryLambda => s"${lambda_class_name(p.ty)} ${idJava.local(p.ident)}"
                   case _ => marshal.paramType(p.ty) + " " + idJava.local(p.ident)
                 }
               }).mkString(", ")
@@ -358,7 +358,7 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
                   case MOptional =>
                     w.w(s"((this.${idJava.field(f.ident)} == null && other.${idJava.field(f.ident)} == null) || ")
                     w.w(s"(this.${idJava.field(f.ident)} != null && this.${idJava.field(f.ident)}.equals(other.${idJava.field(f.ident)})))")
-                  case MLambda =>
+                  case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
                   case t: MPrimitive => w.w(s"this.${idJava.field(f.ident)} == other.${idJava.field(f.ident)}")
                   case df: MDef => df.defType match {
                     case DRecord => w.w(s"this.${idJava.field(f.ident)}.equals(other.${idJava.field(f.ident)})")
@@ -398,7 +398,7 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
                 // Need to repeat this case for MDef
                 case df: MDef => s"${idJava.field(f.ident)}.hashCode()"
                 case MOptional => s"(${idJava.field(f.ident)} == null ? 0 : ${idJava.field(f.ident)}.hashCode())"
-                case MLambda =>
+                case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
                 case t: MPrimitive => t.jName match {
                   case "byte" | "short" | "int" => idJava.field(f.ident)
                   case "long" => s"((int) (${idJava.field(f.ident)} ^ (${idJava.field(f.ident)} >>> 32)))"

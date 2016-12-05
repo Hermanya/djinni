@@ -24,7 +24,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
 
   override def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = {
     tm.base match {
-      case MLambda =>
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
         val ret = tm.args.takeRight(1).map(cppMarshal.typename).head
         val params = tm.args.dropRight(1).map(cppMarshal.typename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
         val args = tm.args.dropRight(1).zipWithIndex.map({ case (_, i) => s"param_$i" }).mkString(",")
@@ -84,7 +84,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         case MOptional => throw new AssertionError("nested optional?")
         case m => javaTypeSignature(tm.args.head)
       }
-      case MLambda => "Ljava/util/function/Function"
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda => "Ljava/util/function/Function"
       case MList => "Ljava/util/ArrayList;"
       case MSet => "Ljava/util/HashSet;"
       case MMap => "Ljava/util/HashMap;"
@@ -110,7 +110,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         case "void" => "void"
       }
       case MOptional => "Optional"
-      case MLambda => throw new AssertionError("unreachable")
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda => throw new AssertionError("unreachable")
       case MBinary => "Binary"
       case MString => if (spec.cppUseWideStrings) "WString" else "String"
       case MDate => "Date"
