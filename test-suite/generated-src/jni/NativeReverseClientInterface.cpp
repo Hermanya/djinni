@@ -3,6 +3,8 @@
 
 #include "NativeReverseClientInterface.hpp"  // my header
 #include "Marshal.hpp"
+#include "NativeClientReturnedRecord.hpp"
+#include "NativeLambdaInterfaceClientReturnedRecordVoid.hpp"
 #include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeLambdaInterfaceI64StringVoid.hpp"
 #include "NativeLambdaInterfaceI64Void.hpp"
@@ -85,6 +87,16 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
         ref->take_binary_lambda_which_returns_nothing([&](int64_t param_0,std::string param_1) { ::djinni_generated::NativeLambdaInterfaceI64StringVoid::toCpp(jniEnv, j_cb)->run(param_0,param_1);});
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_00024CppProxy_native_1getRecord(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jlong j_recordId, jobject j_completionCallback)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
+        ref->get_record(::djinni::I64::toCpp(jniEnv, j_recordId),
+                        [&](::testsuite::ClientReturnedRecord param_0) { ::djinni_generated::NativeLambdaInterfaceClientReturnedRecordVoid::toCpp(jniEnv, j_completionCallback)->run(param_0);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

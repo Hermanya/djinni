@@ -57,6 +57,12 @@ using namespace testsuite;
         XCTAssertEqual(user_id, 123);
         XCTAssertEqualObjects(named_param_1, @"omg");
     }];
+
+    [i getRecord:123 completionCallback:^(DBClientReturnedRecord * _Nonnull record) {
+        XCTAssertEqual(record.recordId, 123);
+        XCTAssertEqualObjects(record.content, @"test string");
+        XCTAssertEqualObjects(record.misc, nil);
+    }];
 }
 
 - (void)testObjcInterfaceWrapper

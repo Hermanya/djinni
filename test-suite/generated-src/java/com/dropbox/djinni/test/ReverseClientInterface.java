@@ -24,6 +24,8 @@ public abstract class ReverseClientInterface {
 
     public abstract void takeBinaryLambdaWhichReturnsNothing(@Nonnull BiConsumer<Long, String> cb);
 
+    public abstract void getRecord(long recordId, @Nonnull Consumer<ClientReturnedRecord> completionCallback);
+
     @CheckForNull
     public static native ReverseClientInterface create();
 
@@ -97,5 +99,13 @@ public abstract class ReverseClientInterface {
             native_takeBinaryLambdaWhichReturnsNothing(this.nativeRef, new LambdaInterfaceI64StringVoid(cb));
         }
         private native void native_takeBinaryLambdaWhichReturnsNothing(long _nativeRef, LambdaInterfaceI64StringVoid cb);
+
+        @Override
+        public void getRecord(long recordId, Consumer<ClientReturnedRecord> completionCallback)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_getRecord(this.nativeRef, recordId, new LambdaInterfaceClientReturnedRecordVoid(completionCallback));
+        }
+        private native void native_getRecord(long _nativeRef, long recordId, LambdaInterfaceClientReturnedRecordVoid completionCallback);
     }
 }

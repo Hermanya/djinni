@@ -10,6 +10,8 @@
 
 namespace testsuite {
 
+struct ClientReturnedRecord;
+
 class ReverseClientInterface {
 public:
     virtual ~ReverseClientInterface() {}
@@ -27,6 +29,8 @@ public:
     virtual void take_lambda_which_returns_string(std::function<std::string(int64_t)> cb) = 0;
 
     virtual void take_binary_lambda_which_returns_nothing(std::function<void(int64_t, std::string)> cb) = 0;
+
+    virtual void get_record(int64_t record_id, const std::function<void(ClientReturnedRecord)> & completionCallback) = 0;
 };
 
 }  // namespace testsuite

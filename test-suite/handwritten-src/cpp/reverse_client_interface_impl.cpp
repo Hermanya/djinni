@@ -35,6 +35,12 @@ void ReverseClientInterfaceImpl::take_binary_lambda_which_returns_nothing(std::f
     cb(123, "omg");
 };
 
+void ReverseClientInterfaceImpl::get_record(int64_t record_id, const std::function<void(ClientReturnedRecord)> & completionCallback) {
+    std::experimental::optional<std::string> maybe_something_else;
+    testsuite::ClientReturnedRecord record(record_id, "test string", maybe_something_else);
+    completionCallback(record);
+};
+
 std::shared_ptr<ReverseClientInterface> ReverseClientInterface::create() {
     return std::make_shared<ReverseClientInterfaceImpl>();
 }

@@ -27,8 +27,8 @@ class ObjcppMarshal(spec: Spec) extends Marshal(spec) {
     tm.base match {
       case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
         val ret_tm = tm.args.takeRight(1).head
-        val ret = cppMarshal.typename(ret_tm)
-        val params = tm.args.dropRight(1).map(cppMarshal.typename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
+        val ret = cppMarshal.fqTypename(ret_tm)
+        val params = tm.args.dropRight(1).map(cppMarshal.fqTypename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
         val args = tm.args.dropRight(1).zipWithIndex.map({ case (tm, i) => s"${helperClass(tm)}::fromCpp(param_$i)" }).mkString(",")
         if (ret == "void") {
           s"[&]($params) { $expr($args);}"

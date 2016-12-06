@@ -25,11 +25,15 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
   override def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = {
     tm.base match {
       case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
-        val ret = tm.args.takeRight(1).map(cppMarshal.typename).head
-        val params = tm.args.dropRight(1).map(cppMarshal.typename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
+        val ret = tm.args.takeRight(1).map(cppMarshal.fqTypename).head
+        val params = tm.args.dropRight(1).map(cppMarshal.fqTypename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
         val args = tm.args.dropRight(1).zipWithIndex.map({ case (_, i) => s"param_$i" }).mkString(",")
 
-        val methodName = idJava.ty(s"native_lambda_interface_${tm.args.map(arg => helperNameWithoutNamespace(arg.base)).mkString("_")}")
+        val methodName = idJava.ty(s"native_lambda_interface_${tm.args.map(arg => arg.base match {
+          case d: MDef => helperClass(d.name).substring("native".size)
+          case e: MExtern => e.jni.translator
+          case o => helperNameWithoutNamespace(o)
+        }).mkString("_")}")
         if (ret == "void") {
           s"[&]($params) { ::${spec.jniNamespace}::$methodName::toCpp(jniEnv, $expr)->run($args);}"
         } else {
@@ -117,7 +121,9 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
       case MList => "List"
       case MSet => "Set"
       case MMap => "Map"
-      case d: MDef => throw new AssertionError("unreachable")
+      case d: MDef => {
+        throw new AssertionError("unreachable")
+      }
       case e: MExtern => throw new AssertionError("unreachable")
       case p: MParam => throw new AssertionError("not applicable")
   }

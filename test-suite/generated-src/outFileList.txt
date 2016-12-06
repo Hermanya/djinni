@@ -41,6 +41,7 @@ djinni-output-temp/cpp/reverse_client_interface.hpp
 djinni-output-temp/cpp/lambda_interface_i64_void.hpp
 djinni-output-temp/cpp/lambda_interface_i64_string.hpp
 djinni-output-temp/cpp/lambda_interface_i64_string_void.hpp
+djinni-output-temp/cpp/lambda_interface_client_returned_record_void.hpp
 djinni-output-temp/cpp/cpp_exception.hpp
 djinni-output-temp/cpp/primitive_list.hpp
 djinni-output-temp/cpp/map_record.hpp
@@ -86,6 +87,7 @@ djinni-output-temp/java/ReverseClientInterface.java
 djinni-output-temp/java/LambdaInterfaceI64Void.java
 djinni-output-temp/java/LambdaInterfaceI64String.java
 djinni-output-temp/java/LambdaInterfaceI64StringVoid.java
+djinni-output-temp/java/LambdaInterfaceClientReturnedRecordVoid.java
 djinni-output-temp/java/CppException.java
 djinni-output-temp/java/PrimitiveList.java
 djinni-output-temp/java/MapRecord.java
@@ -163,6 +165,8 @@ djinni-output-temp/jni/NativeLambdaInterfaceI64String.hpp
 djinni-output-temp/jni/NativeLambdaInterfaceI64String.cpp
 djinni-output-temp/jni/NativeLambdaInterfaceI64StringVoid.hpp
 djinni-output-temp/jni/NativeLambdaInterfaceI64StringVoid.cpp
+djinni-output-temp/jni/NativeLambdaInterfaceClientReturnedRecordVoid.hpp
+djinni-output-temp/jni/NativeLambdaInterfaceClientReturnedRecordVoid.cpp
 djinni-output-temp/jni/NativeCppException.hpp
 djinni-output-temp/jni/NativeCppException.cpp
 djinni-output-temp/jni/NativePrimitiveList.hpp
@@ -228,6 +232,7 @@ djinni-output-temp/objc/DBReverseClientInterface.h
 djinni-output-temp/objc/DBLambdaInterfaceI64Void.h
 djinni-output-temp/objc/DBLambdaInterfaceI64String.h
 djinni-output-temp/objc/DBLambdaInterfaceI64StringVoid.h
+djinni-output-temp/objc/DBLambdaInterfaceClientReturnedRecordVoid.h
 djinni-output-temp/objc/DBCppException.h
 djinni-output-temp/objc/DBPrimitiveList.h
 djinni-output-temp/objc/DBPrimitiveList.mm
@@ -312,6 +317,8 @@ djinni-output-temp/objc/DBLambdaInterfaceI64String+Private.h
 djinni-output-temp/objc/DBLambdaInterfaceI64String+Private.mm
 djinni-output-temp/objc/DBLambdaInterfaceI64StringVoid+Private.h
 djinni-output-temp/objc/DBLambdaInterfaceI64StringVoid+Private.mm
+djinni-output-temp/objc/DBLambdaInterfaceClientReturnedRecordVoid+Private.h
+djinni-output-temp/objc/DBLambdaInterfaceClientReturnedRecordVoid+Private.mm
 djinni-output-temp/objc/DBCppException+Private.h
 djinni-output-temp/objc/DBCppException+Private.mm
 djinni-output-temp/objc/DBPrimitiveList+Private.h

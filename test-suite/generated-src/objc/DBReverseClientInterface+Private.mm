@@ -3,6 +3,7 @@
 
 #import "DBReverseClientInterface+Private.h"
 #import "DBReverseClientInterface.h"
+#import "DBClientReturnedRecord+Private.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
@@ -73,6 +74,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0, NSString * _Nonnull named_param_1))cb {
     try {
         _cppRefHandle.get()->take_binary_lambda_which_returns_nothing([&](int64_t param_0,std::string param_1) { cb(::djinni::I64::fromCpp(param_0),::djinni::String::fromCpp(param_1));});
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)getRecord:(int64_t)recordId
+completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull named_param_0))completionCallback {
+    try {
+        _cppRefHandle.get()->get_record(::djinni::I64::toCpp(recordId),
+                                        [&](::testsuite::ClientReturnedRecord param_0) { completionCallback(::djinni_generated::ClientReturnedRecord::fromCpp(param_0));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
