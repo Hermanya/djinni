@@ -111,7 +111,21 @@ class ObjcMarshal(spec: Spec) extends Marshal(spec) {
             case MDate => ("NSDate", true)
             case MBinary => ("NSData", true)
             case MOptional => throw new AssertionError("optional should have been special cased")
-            case MNullaryLambda | MUnaryLambda | MBinaryLambda => ("void (^)()", true)
+            case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
+              def n (x: MExpr):String = {
+                nullability(x) match {
+                  case Some("nonnull") => "_Nonnull"
+                  case Some("nullable") => "_Nullable"
+                  case None => ""
+                  case _ => throw new AssertionError("unreachable")
+                }
+              }
+              val ret = tm.args.takeRight(1).map((tm) => toObjcParamType(tm) + " " + n(tm)).head
+              val params = tm.args.dropRight(1).zipWithIndex.map { case (x, i) => {
+                val t = toObjcParamType(x)
+                s"$t ${n(x)} named_param_$i"
+              }}.mkString(", ")
+              (s"$ret (^) ($params)", false)
             case MList => ("NSArray" + args(tm), true)
             case MSet => ("NSSet" + args(tm), true)
             case MMap => ("NSDictionary" + args(tm), true)

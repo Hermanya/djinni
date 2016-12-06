@@ -43,6 +43,20 @@ using namespace testsuite;
 
     XCTAssertEqualObjects([i methTakingInterface:i], @"test");
     XCTAssertEqualObjects([i methTakingOptionalInterface:i], @"test");
+
+    [i takeLambdaWhichReturnsNothing:^(int64_t named_param_0) {
+        XCTAssertEqual(named_param_0, 123);
+    }];
+
+    [i takeLambdaWhichReturnsString:^NSString * _Nonnull(int64_t named_param_0) {
+        XCTAssertEqual(named_param_0, 123);
+        return @"test";
+    }];
+
+    [i takeBinaryLambdaWhichReturnsNothing:^(int64_t user_id, NSString * _Nonnull named_param_1) {
+        XCTAssertEqual(user_id, 123);
+        XCTAssertEqualObjects(named_param_1, @"omg");
+    }];
 }
 
 - (void)testObjcInterfaceWrapper

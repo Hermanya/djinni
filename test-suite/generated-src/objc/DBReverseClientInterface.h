@@ -15,10 +15,10 @@
 
 + (nullable DBReverseClientInterface *)create;
 
-- (void)takeLambdaWhichReturnsNothing:(nonnull void (^)() *)cb;
+- (void)takeLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0))cb;
 
-- (void)takeLambdaWhichReturnsString:(nonnull void (^)() *)cb;
+- (void)takeLambdaWhichReturnsString:(nonnull NSString * _Nonnull (^) (int64_t  named_param_0))cb;
 
-- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void (^)() *)cb;
+- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0, NSString * _Nonnull named_param_1))cb;
 
 @end

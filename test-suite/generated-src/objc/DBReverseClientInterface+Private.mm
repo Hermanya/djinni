@@ -58,21 +58,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)takeLambdaWhichReturnsNothing:(nonnull void (^)() *)cb {
+- (void)takeLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0))cb {
     try {
-        _cppRefHandle.get()->take_lambda_which_returns_nothing(::djinni::qwerwrFunction<::djinni::I64, ::djinni::void>::toCpp(cb));
+        _cppRefHandle.get()->take_lambda_which_returns_nothing([&](int64_t param_0) { cb(::djinni::I64::fromCpp(param_0));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)takeLambdaWhichReturnsString:(nonnull void (^)() *)cb {
+- (void)takeLambdaWhichReturnsString:(nonnull NSString * _Nonnull (^) (int64_t  named_param_0))cb {
     try {
-        _cppRefHandle.get()->take_lambda_which_returns_string(::djinni::qwerwrFunction<::djinni::I64, ::djinni::String>::toCpp(cb));
+        _cppRefHandle.get()->take_lambda_which_returns_string([&](int64_t param_0) -> std::string { return ::djinni::String::toCpp(cb(::djinni::I64::fromCpp(param_0)));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void (^)() *)cb {
+- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0, NSString * _Nonnull named_param_1))cb {
     try {
-        _cppRefHandle.get()->take_binary_lambda_which_returns_nothing(::djinni::qwerwrFunction<::djinni::I64, ::djinni::String, ::djinni::void>::toCpp(cb));
+        _cppRefHandle.get()->take_binary_lambda_which_returns_nothing([&](int64_t param_0,std::string param_1) { cb(::djinni::I64::fromCpp(param_0),::djinni::String::fromCpp(param_1));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

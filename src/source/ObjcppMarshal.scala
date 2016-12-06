@@ -24,7 +24,19 @@ class ObjcppMarshal(spec: Spec) extends Marshal(spec) {
   override def fqFieldType(tm: MExpr): String = throw new AssertionError("not applicable")
 
   override def toCpp(tm: MExpr, expr: String, cppMarshal: CppMarshal): String = {
-    s"${helperClass(tm)}::toCpp($expr)"
+    tm.base match {
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
+        val ret_tm = tm.args.takeRight(1).head
+        val ret = cppMarshal.typename(ret_tm)
+        val params = tm.args.dropRight(1).map(cppMarshal.typename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
+        val args = tm.args.dropRight(1).zipWithIndex.map({ case (tm, i) => s"${helperClass(tm)}::fromCpp(param_$i)" }).mkString(",")
+        if (ret == "void") {
+          s"[&]($params) { $expr($args);}"
+        } else {
+          s"[&]($params) -> $ret { return ${helperClass(ret_tm)}::toCpp($expr($args));}"
+        }
+      case _ => s"${helperClass(tm)}::toCpp($expr)"
+    }
   }
   override def fromCpp(tm: MExpr, expr: String): String = {
     s"${helperClass(tm)}::fromCpp($expr)"
@@ -73,7 +85,7 @@ class ObjcppMarshal(spec: Spec) extends Marshal(spec) {
         case "void" => "void"
       }
       case MOptional => "Optional"
-      case MNullaryLambda | MUnaryLambda | MBinaryLambda => "qwerwrFunction"
+      case MNullaryLambda | MUnaryLambda | MBinaryLambda => throw new AssertionError("unreachable")
       case MBinary => "Binary"
       case MDate => "Date"
       case MString => if (spec.cppUseWideStrings) "WString" else "String"
