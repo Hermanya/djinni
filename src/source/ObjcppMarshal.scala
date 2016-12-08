@@ -31,9 +31,9 @@ class ObjcppMarshal(spec: Spec) extends Marshal(spec) {
         val params = tm.args.dropRight(1).map(cppMarshal.fqTypename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
         val args = tm.args.dropRight(1).zipWithIndex.map({ case (tm, i) => s"${helperClass(tm)}::fromCpp(param_$i)" }).mkString(",")
         if (ret == "void") {
-          s"[&]($params) { $expr($args);}"
+          s"[=]($params) { $expr($args);}"
         } else {
-          s"[&]($params) -> $ret { return ${helperClass(ret_tm)}::toCpp($expr($args));}"
+          s"[=]($params) -> $ret { return ${helperClass(ret_tm)}::toCpp($expr($args));}"
         }
       case _ => s"${helperClass(tm)}::toCpp($expr)"
     }
