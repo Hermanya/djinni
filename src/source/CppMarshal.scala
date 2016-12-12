@@ -56,7 +56,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
     case MDate => List(ImportRef("<chrono>"))
     case MBinary => List(ImportRef("<vector>"), ImportRef("<cstdint>"))
     case MOptional => List(ImportRef(spec.cppOptionalHeader))
-    case MNullaryLambda | MUnaryLambda | MBinaryLambda => List()
+    case MNullaryLambda | MUnaryLambda | MBinaryLambda => List(ImportRef("<functional>"))
     case MList => List(ImportRef("<vector>"))
     case MSet => List(ImportRef("<unordered_set>"))
     case MMap => List(ImportRef("<unordered_map>"))
