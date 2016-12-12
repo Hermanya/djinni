@@ -28,16 +28,10 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         val ret = tm.args.takeRight(1).map(cppMarshal.fqTypename).head
         val params = tm.args.dropRight(1).map(cppMarshal.fqTypename).zipWithIndex.map({ case (p, i) => s"$p param_$i" }).mkString(",")
         val args = tm.args.dropRight(1).zipWithIndex.map({ case (_, i) => s"param_$i" }).mkString(",")
-
-        val methodName = idJava.ty(s"native_lambda_interface_${tm.args.map(arg => arg.base match {
-          case d: MDef => helperClass(d.name).substring("native".size)
-          case e: MExtern => e.jni.translator
-          case o => helperNameWithoutNamespace(o)
-        }).mkString("_")}")
         if (ret == "void") {
-          s"[&]($params) { ::${spec.jniNamespace}::$methodName::toCpp(jniEnv, $expr)->run($args);}"
+          s"[=]($params) { ${expr}_lambda_object->run($args);}"
         } else {
-          s"[&]($params) -> $ret { return ::${spec.jniNamespace}::$methodName::toCpp(jniEnv, $expr)->run($args);}"
+          s"[=]($params) -> $ret { return ${expr}_lambda_object->run($args);}"
         }
       case _ => s"${helperClass(tm)}::toCpp(jniEnv, $expr)"
     }

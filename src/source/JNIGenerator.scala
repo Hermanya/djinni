@@ -361,6 +361,17 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
                 val functionString: String = s"${javaMarshal.fqTypename(ident, i)}#$javaMethodName$javaParamsString"
                 w.wl( s"""DJINNI_ASSERT_MSG(j_$paramName, jniEnv, "Got unexpected null parameter '$paramName' to function $functionString");""")
               }
+              p.ty.resolved.base match {
+                case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
+                  val methodName = idJava.ty(s"native_lambda_interface_${p.ty.resolved.args.map(arg => arg.base match {
+                    case d: MDef => jniMarshal.helperClass(d.name).substring("native".size)
+                    case e: MExtern => e.jni.translator
+                    case o => jniMarshal.helperNameWithoutNamespace(o)
+                  }).mkString("_")}")
+                  val local_var = "j_" + idJava.local(p.ident) + "_lambda_object"
+                  w.wl(s"${spec.jniNamespace}::$methodName::CppType ${local_var} = ${spec.jniNamespace}::$methodName::toCpp(jniEnv, ${"j_" + idJava.local(p.ident)});")
+                case _ =>
+              }
             })
             val methodName = idCpp.method(m.ident)
             val ret = m.ret.fold("")(r => "auto r = ")
