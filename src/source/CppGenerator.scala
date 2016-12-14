@@ -280,6 +280,14 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                       |${w.getCurrentIndent()}}
                       |${w.getCurrentIndent()}json11::Json $name = json11::Json::array({vector_with_json_${name}});""".stripMargin('|')
                 }
+                case MMap => {
+                s"""std::map<std::string, json11::Json> map_with_json_${name};
+                    |${w.getCurrentIndent()}for (auto &item : $value) {
+                    |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item.second")}
+                    |${w.getCurrentIndent()}${w.getIndent()}map_with_json_${name}[item.first] = item_value;
+                    |${w.getCurrentIndent()}}
+                    |${w.getCurrentIndent()}json11::Json $name = json11::Json(map_with_json_${name});""".stripMargin('|')
+                }
                 case MString => s"json11::Json $name = json11::Json($value);"
                 case p: MPrimitive => p._idlName match {
                   case "bool" => s"json11::Json $name = json11::Json($value);"
@@ -320,6 +328,13 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                   |${w.getCurrentIndent()}for (auto &item : $json.array_items()) {
                   |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item")}
                   |${w.getCurrentIndent()}${w.getIndent()}$name.push_back(item_value);
+                  |${w.getCurrentIndent()}}""".stripMargin('|')
+                }
+                case MMap => {
+                  s"""std::unordered_map<std::string, ${marshal.fieldType(expr.args.head)}> $name;
+                  |${w.getCurrentIndent()}for (auto &item : $json.object_items()) {
+                  |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item.second")}
+                  |${w.getCurrentIndent()}${w.getIndent()}$name[item.first] = item_value;
                   |${w.getCurrentIndent()}}""".stripMargin('|')
                 }
                 case MString => s"${marshal.typename(expr)} $name = $json.string_value();"
