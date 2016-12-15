@@ -68,7 +68,8 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
-        ref->take_lambda_which_returns_nothing([&](int64_t param_0) { ::djinni_generated::NativeLambdaInterfaceI64Void::toCpp(jniEnv, j_cb)->run(param_0);});
+        djinni_generated::NativeLambdaInterfaceI64Void::CppType j_cb_lambda_object = djinni_generated::NativeLambdaInterfaceI64Void::toCpp(jniEnv, j_cb);
+        ref->take_lambda_which_returns_nothing([=](int64_t param_0) { j_cb_lambda_object->run(param_0);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -77,7 +78,8 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
-        ref->take_lambda_which_returns_string([&](int64_t param_0) -> std::string { return ::djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb)->run(param_0);});
+        djinni_generated::NativeLambdaInterfaceI64String::CppType j_cb_lambda_object = djinni_generated::NativeLambdaInterfaceI64String::toCpp(jniEnv, j_cb);
+        ref->take_lambda_which_returns_string([=](int64_t param_0) -> std::string { return j_cb_lambda_object->run(param_0);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -86,7 +88,8 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
-        ref->take_binary_lambda_which_returns_nothing([&](int64_t param_0,std::string param_1) { ::djinni_generated::NativeLambdaInterfaceI64StringVoid::toCpp(jniEnv, j_cb)->run(param_0,param_1);});
+        djinni_generated::NativeLambdaInterfaceI64StringVoid::CppType j_cb_lambda_object = djinni_generated::NativeLambdaInterfaceI64StringVoid::toCpp(jniEnv, j_cb);
+        ref->take_binary_lambda_which_returns_nothing([=](int64_t param_0,std::string param_1) { j_cb_lambda_object->run(param_0,param_1);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -95,8 +98,9 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
+        djinni_generated::NativeLambdaInterfaceClientReturnedRecordVoid::CppType j_completionCallback_lambda_object = djinni_generated::NativeLambdaInterfaceClientReturnedRecordVoid::toCpp(jniEnv, j_completionCallback);
         ref->get_record(::djinni::I64::toCpp(jniEnv, j_recordId),
-                        [&](::testsuite::ClientReturnedRecord param_0) { ::djinni_generated::NativeLambdaInterfaceClientReturnedRecordVoid::toCpp(jniEnv, j_completionCallback)->run(param_0);});
+                        [=](::testsuite::ClientReturnedRecord param_0) { j_completionCallback_lambda_object->run(param_0);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

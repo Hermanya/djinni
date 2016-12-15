@@ -59,29 +59,29 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)takeLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0))cb {
+- (void)takeLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  arg))cb {
     try {
-        _cppRefHandle.get()->take_lambda_which_returns_nothing([&](int64_t param_0) { cb(::djinni::I64::fromCpp(param_0));});
+        _cppRefHandle.get()->take_lambda_which_returns_nothing([=](int64_t param_0) { cb(::djinni::I64::fromCpp(param_0));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)takeLambdaWhichReturnsString:(nonnull NSString * _Nonnull (^) (int64_t  named_param_0))cb {
+- (void)takeLambdaWhichReturnsString:(nonnull NSString * _Nonnull (^) (int64_t  arg))cb {
     try {
-        _cppRefHandle.get()->take_lambda_which_returns_string([&](int64_t param_0) -> std::string { return ::djinni::String::toCpp(cb(::djinni::I64::fromCpp(param_0)));});
+        _cppRefHandle.get()->take_lambda_which_returns_string([=](int64_t param_0) -> std::string { return ::djinni::String::toCpp(cb(::djinni::I64::fromCpp(param_0)));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0, NSString * _Nonnull named_param_1))cb {
+- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  arg, NSString * _Nonnull arg1))cb {
     try {
-        _cppRefHandle.get()->take_binary_lambda_which_returns_nothing([&](int64_t param_0,std::string param_1) { cb(::djinni::I64::fromCpp(param_0),::djinni::String::fromCpp(param_1));});
+        _cppRefHandle.get()->take_binary_lambda_which_returns_nothing([=](int64_t param_0,std::string param_1) { cb(::djinni::I64::fromCpp(param_0),::djinni::String::fromCpp(param_1));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (void)getRecord:(int64_t)recordId
-completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull named_param_0))completionCallback {
+completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull clientReturnedRecord))completionCallback {
     try {
         _cppRefHandle.get()->get_record(::djinni::I64::toCpp(recordId),
-                                        [&](::testsuite::ClientReturnedRecord param_0) { completionCallback(::djinni_generated::ClientReturnedRecord::fromCpp(param_0));});
+                                        [=](::testsuite::ClientReturnedRecord param_0) { completionCallback(::djinni_generated::ClientReturnedRecord::fromCpp(param_0));});
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

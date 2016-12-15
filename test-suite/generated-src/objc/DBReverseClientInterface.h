@@ -16,13 +16,13 @@
 
 + (nullable DBReverseClientInterface *)create;
 
-- (void)takeLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0))cb;
+- (void)takeLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  arg))cb;
 
-- (void)takeLambdaWhichReturnsString:(nonnull NSString * _Nonnull (^) (int64_t  named_param_0))cb;
+- (void)takeLambdaWhichReturnsString:(nonnull NSString * _Nonnull (^) (int64_t  arg))cb;
 
-- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  named_param_0, NSString * _Nonnull named_param_1))cb;
+- (void)takeBinaryLambdaWhichReturnsNothing:(nonnull void  (^) (int64_t  arg, NSString * _Nonnull arg1))cb;
 
 - (void)getRecord:(int64_t)recordId
-completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull named_param_0))completionCallback;
+completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull clientReturnedRecord))completionCallback;
 
 @end

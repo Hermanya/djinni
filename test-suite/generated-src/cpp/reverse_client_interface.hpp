@@ -5,6 +5,7 @@
 
 #include "../../handwritten-src/cpp/optional.hpp"
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 

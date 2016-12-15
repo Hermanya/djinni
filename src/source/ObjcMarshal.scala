@@ -121,10 +121,17 @@ class ObjcMarshal(spec: Spec) extends Marshal(spec) {
                 }
               }
               val ret = tm.args.takeRight(1).map((tm) => toObjcParamType(tm) + " " + n(tm)).head
-              val params = tm.args.dropRight(1).zipWithIndex.map { case (x, i) => {
+              val params = tm.args.dropRight(1).zipWithIndex.map({ case (x, i) =>
                 val t = toObjcParamType(x)
-                s"$t ${n(x)} named_param_$i"
-              }}.mkString(", ")
+                val preliminary_names = tm.args.dropRight(1).map(arg => arg.base match {
+                  case d: MDef => d.name
+                  case _ => "arg"
+                })
+                val name = preliminary_names(i)
+                val first_of_a_kind = preliminary_names.indexOf(name) == i
+                val param_name = if (first_of_a_kind) name else s"${name}_$i"
+                s"$t ${n(x)} ${idObjc.local(param_name)}"
+              }).mkString(", ")
               (s"$ret (^) ($params)", false)
             case MList => ("NSArray" + args(tm), true)
             case MSet => ("NSSet" + args(tm), true)
