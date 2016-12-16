@@ -123,10 +123,17 @@ class ObjcMarshal(spec: Spec) extends Marshal(spec) {
               val ret = tm.args.takeRight(1).map((tm) => toObjcParamType(tm) + " " + n(tm)).head
               val params = tm.args.dropRight(1).zipWithIndex.map({ case (x, i) =>
                 val t = toObjcParamType(x)
-                val preliminary_names = tm.args.dropRight(1).map(arg => arg.base match {
-                  case d: MDef => d.name
-                  case _ => "arg"
-                })
+                def snakify(name : String) = name.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
+                def get_type_name (arg: MExpr): String = {
+                  arg.base match {
+                    case MNullaryLambda | MUnaryLambda | MBinaryLambda => "callback"
+                    case MOptional => get_type_name(arg.args.head)
+                    case d: MDef => d.name
+                    case e: MExtern => e.name
+                    case _ => "arg"
+                  }
+                }
+                val preliminary_names = tm.args.dropRight(1).map(get_type_name).map(snakify)
                 val name = preliminary_names(i)
                 val first_of_a_kind = preliminary_names.indexOf(name) == i
                 val param_name = if (first_of_a_kind) name else s"${name}_$i"
