@@ -18,6 +18,8 @@ class ReverseClientInterfaceImpl : public ReverseClientInterface {
     virtual void take_lambda_which_returns_string(std::function<std::string(int64_t)> cb) override;
     virtual void take_binary_lambda_which_returns_nothing(std::function<void(int64_t, std::string)> cb) override;
     virtual void get_record(int64_t record_id, const std::function<void(ClientReturnedRecord)> & completionCallback) override;
+    virtual void test_typed_classes(int64_t record_id, const std::function<void(std::experimental::optional<::testsuite::ClientReturnedRecord>,std::unordered_map<std::string, std::string>)> & completionCallback) override;
+
     static std::shared_ptr<ReverseClientInterface> create();
 };
 

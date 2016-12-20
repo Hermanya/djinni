@@ -27,5 +27,5 @@ reverse_client_interface = interface +c {
     take_lambda_which_returns_string(cb: unary_lambda<i64, string>);
     take_binary_lambda_which_returns_nothing(cb: binary_lambda<i64, string, void>);
     get_record(record_id: i64, completionCallback: unary_lambda<client_returned_record, void>);
-
+    test_typed_classes(record_id: i64, completionCallback: binary_lambda<optional<client_returned_record>, map<string, string>, void>);
 }

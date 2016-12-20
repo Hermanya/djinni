@@ -175,13 +175,17 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
     writeJniFiles(origin, params.nonEmpty, ident, refs, writeJniPrototype, writeJniBody)
   }
 
+  def lambdaTypes (expr: TypeExpr): String = {
+    expr.args.flatMap(a => List(a.ident.name, lambdaTypes(a))).filter(_ != "").mkString("_")
+  }
+
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface) {
     val refs = new JNIRefs(ident.name)
     i.methods.foreach(m => {
       m.params.foreach(p => refs.find(p.ty))
       m.ret.foreach(refs.find)
       (m.params.map(p => p.ty) ++ m.ret).filter(ty => List("nullary_lambda", "unary_lambda", "binary_lambda").contains(ty.expr.ident.name)).map(ty => {
-        val ofType = idJava.ty(ty.expr.args.map(a => a.ident.name).mkString("_"))
+        val ofType = idJava.ty(lambdaTypes(ty.expr))
         refs.jniCpp.add("#include \"NativeLambdaInterface" + ofType + ".hpp\"")
       })
     })
@@ -363,11 +367,7 @@ class JNIGenerator(spec: Spec) extends Generator(spec) {
               }
               p.ty.resolved.base match {
                 case MNullaryLambda | MUnaryLambda | MBinaryLambda =>
-                  val methodName = idJava.ty(s"native_lambda_interface_${p.ty.resolved.args.map(arg => arg.base match {
-                    case d: MDef => jniMarshal.helperClass(d.name).substring("native".size)
-                    case e: MExtern => e.jni.translator
-                    case o => jniMarshal.helperNameWithoutNamespace(o)
-                  }).mkString("_")}")
+                  val methodName = idJava.ty(s"native_lambda_interface_${lambdaTypes(p.ty.expr)}")
                   val local_var = "j_" + idJava.local(p.ident) + "_lambda_object"
                   w.wl(s"${spec.jniNamespace}::$methodName::CppType ${local_var} = ${spec.jniNamespace}::$methodName::toCpp(jniEnv, ${"j_" + idJava.local(p.ident)});")
                 case _ =>

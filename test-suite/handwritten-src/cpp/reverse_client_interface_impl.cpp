@@ -41,6 +41,15 @@ void ReverseClientInterfaceImpl::get_record(int64_t record_id, const std::functi
     completionCallback(record);
 };
 
+void ReverseClientInterfaceImpl::test_typed_classes(int64_t record_id, const std::function<void(std::experimental::optional<::testsuite::ClientReturnedRecord>,std::unordered_map<std::string, std::string>)> & completionCallback) {
+    std::experimental::optional<std::string> maybe_something_else;
+    testsuite::ClientReturnedRecord record(record_id, "test string", maybe_something_else);
+    std::experimental::optional<testsuite::ClientReturnedRecord> the_record = record;
+    std::unordered_map<std::string, std::string> map;
+    completionCallback(the_record, map);
+};
+
+
 std::shared_ptr<ReverseClientInterface> ReverseClientInterface::create() {
     return std::make_shared<ReverseClientInterfaceImpl>();
 }

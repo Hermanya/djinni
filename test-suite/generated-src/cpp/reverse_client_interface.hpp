@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 namespace testsuite {
 
@@ -32,6 +33,8 @@ public:
     virtual void take_binary_lambda_which_returns_nothing(std::function<void(int64_t, std::string)> cb) = 0;
 
     virtual void get_record(int64_t record_id, const std::function<void(ClientReturnedRecord)> & completionCallback) = 0;
+
+    virtual void test_typed_classes(int64_t record_id, const std::function<void(std::experimental::optional<ClientReturnedRecord>, std::unordered_map<std::string, std::string>)> & completionCallback) = 0;
 };
 
 }  // namespace testsuite

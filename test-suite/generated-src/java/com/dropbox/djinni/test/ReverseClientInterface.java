@@ -3,6 +3,7 @@
 
 package com.dropbox.djinni.test;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 import javax.annotation.CheckForNull;
@@ -25,6 +26,8 @@ public abstract class ReverseClientInterface {
     public abstract void takeBinaryLambdaWhichReturnsNothing(@Nonnull BiConsumer<Long, String> cb);
 
     public abstract void getRecord(long recordId, @Nonnull Consumer<ClientReturnedRecord> completionCallback);
+
+    public abstract void testTypedClasses(long recordId, @Nonnull BiConsumer<ClientReturnedRecord, HashMap<String, String>> completionCallback);
 
     @CheckForNull
     public static native ReverseClientInterface create();
@@ -107,5 +110,13 @@ public abstract class ReverseClientInterface {
             native_getRecord(this.nativeRef, recordId, new LambdaInterfaceClientReturnedRecordVoid(completionCallback));
         }
         private native void native_getRecord(long _nativeRef, long recordId, LambdaInterfaceClientReturnedRecordVoid completionCallback);
+
+        @Override
+        public void testTypedClasses(long recordId, BiConsumer<ClientReturnedRecord, HashMap<String, String>> completionCallback)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_testTypedClasses(this.nativeRef, recordId, new LambdaInterfaceOptionalClientReturnedRecordMapStringStringVoid(completionCallback));
+        }
+        private native void native_testTypedClasses(long _nativeRef, long recordId, LambdaInterfaceOptionalClientReturnedRecordMapStringStringVoid completionCallback);
     }
 }

@@ -313,7 +313,10 @@ def parseFile(idlFile: File, inFileListWriter: Option[Writer]): Seq[TypeDecl] = 
                       index = index + 1
                       Field(Ident(s"param_$index", file, loc), TypeRef(t), Doc(List("doc")))
                     })
-                    val interface_id = Ident(s"lambda_interface_${t.expr.args.map(t => t.ident.name).mkString("_")}", file, loc)
+                    def lambdaTypes (expr: TypeExpr): String = {
+                      expr.args.flatMap(a => List(a.ident.name, lambdaTypes(a))).filter(_ != "").mkString("_")
+                    }
+                    val interface_id = Ident(s"lambda_interface_${lambdaTypes(t.expr)}", file, loc)
                     var return_value = TypeRef(t.expr.args.takeRight(1).head)
                     if (return_value.expr.ident.name == "void") {
                       return_value = null

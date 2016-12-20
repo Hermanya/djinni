@@ -255,7 +255,10 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
               val returnStmt = m.ret.fold("")(x => if (x.expr.ident.name != "void") { "return " } else {""})
               val params = m.params.map(p => marshal.paramType(p.ty) + " " + idJava.local(p.ident)).mkString(", ")
               def lambda_class_name (ty: TypeRef): String = {
-                idJava.ty("lambda_interface_" + ty.expr.args.map(t => t.ident.name).mkString("_"))
+                idJava.ty("lambda_interface_" + lambdaTypes(ty.expr))
+              }
+              def lambdaTypes (expr: TypeExpr): String = {
+                expr.args.flatMap(a => List(a.ident.name, lambdaTypes(a))).filter(_ != "").mkString("_")
               }
               val args = m.params.map(p => {
                 p.ty.resolved.base match {

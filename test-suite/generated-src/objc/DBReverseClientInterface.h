@@ -25,4 +25,7 @@
 - (void)getRecord:(int64_t)recordId
 completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull clientReturnedRecord))completionCallback;
 
+- (void)testTypedClasses:(int64_t)recordId
+      completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nullable clientReturnedRecord, NSDictionary<NSString *, NSString *> * _Nonnull arg))completionCallback;
+
 @end

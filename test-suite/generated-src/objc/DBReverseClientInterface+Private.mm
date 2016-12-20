@@ -85,6 +85,14 @@ completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nonnull clientR
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)testTypedClasses:(int64_t)recordId
+      completionCallback:(nonnull void  (^) (DBClientReturnedRecord * _Nullable clientReturnedRecord, NSDictionary<NSString *, NSString *> * _Nonnull arg))completionCallback {
+    try {
+        _cppRefHandle.get()->test_typed_classes(::djinni::I64::toCpp(recordId),
+                                                [=](std::experimental::optional<::testsuite::ClientReturnedRecord> param_0,std::unordered_map<std::string, std::string> param_1) { completionCallback(::djinni::Optional<std::experimental::optional, ::djinni_generated::ClientReturnedRecord>::fromCpp(param_0),::djinni::Map<::djinni::String, ::djinni::String>::fromCpp(param_1));});
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto ReverseClientInterface::toCpp(ObjcType objc) -> CppType

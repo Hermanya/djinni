@@ -8,6 +8,7 @@
 #include "NativeLambdaInterfaceI64String.hpp"
 #include "NativeLambdaInterfaceI64StringVoid.hpp"
 #include "NativeLambdaInterfaceI64Void.hpp"
+#include "NativeLambdaInterfaceOptionalClientReturnedRecordMapStringStringVoid.hpp"
 
 namespace djinni_generated {
 
@@ -101,6 +102,17 @@ CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_0002
         djinni_generated::NativeLambdaInterfaceClientReturnedRecordVoid::CppType j_completionCallback_lambda_object = djinni_generated::NativeLambdaInterfaceClientReturnedRecordVoid::toCpp(jniEnv, j_completionCallback);
         ref->get_record(::djinni::I64::toCpp(jniEnv, j_recordId),
                         [=](::testsuite::ClientReturnedRecord param_0) { j_completionCallback_lambda_object->run(param_0);});
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_ReverseClientInterface_00024CppProxy_native_1testTypedClasses(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jlong j_recordId, jobject j_completionCallback)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::testsuite::ReverseClientInterface>(nativeRef);
+        djinni_generated::NativeLambdaInterfaceOptionalClientReturnedRecordMapStringStringVoid::CppType j_completionCallback_lambda_object = djinni_generated::NativeLambdaInterfaceOptionalClientReturnedRecordMapStringStringVoid::toCpp(jniEnv, j_completionCallback);
+        ref->test_typed_classes(::djinni::I64::toCpp(jniEnv, j_recordId),
+                                [=](std::experimental::optional<::testsuite::ClientReturnedRecord> param_0,std::unordered_map<std::string, std::string> param_1) { j_completionCallback_lambda_object->run(param_0,param_1);});
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

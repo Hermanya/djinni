@@ -45,5 +45,10 @@ public class ClientInterfaceTest extends TestCase {
             assertEquals(record.getContent(), "test string");
             assertEquals(record.getMisc(), null);
         });
+        i.testTypedClasses(123, (record, map) -> {
+            assertEquals(record.getRecordId(), 123);
+            assertEquals(record.getContent(), "test string");
+            assertEquals(record.getMisc(), null);
+        });
     }
 }
