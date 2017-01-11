@@ -230,7 +230,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
               writeAlignedCall(w, "return ", r.fields, " &&", "", f => s"lhs.${idCpp.field(f.ident)} == rhs.${idCpp.field(f.ident)}")
               w.wl(";")
             } else {
-             w.wl("return true;")
+              w.wl("return true;")
             }
           }
           w.wl
@@ -271,6 +271,12 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl
           w.w(s"json11::Json parsed_json_from_$actualSelf (const $actualSelf& record)").braced {
             def cppFor(expr: MExpr, name: String, value: String) : String = {
+              var field_prefix = "record_json.insert({\"" + idJava.method(name) +"\","
+              var field_suffix = "})"
+              if (name == "item_value" || name == "actual_value") {
+                field_prefix = s"json11::Json $name = "
+                field_suffix = ""
+              }
               expr.base match {
                 case MList => {
                   s"""std::vector<json11::Json> vector_with_json_${name};
@@ -278,42 +284,43 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
                       |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item")}
                       |${w.getCurrentIndent()}${w.getIndent()}vector_with_json_${name}.push_back(item_value);
                       |${w.getCurrentIndent()}}
-                      |${w.getCurrentIndent()}json11::Json $name = json11::Json::array({vector_with_json_${name}});""".stripMargin('|')
+                      |${w.getCurrentIndent()}$field_prefix json11::Json::array({vector_with_json_${name}})$field_suffix;""".stripMargin
                 }
                 case MMap => {
-                s"""std::map<std::string, json11::Json> map_with_json_${name};
-                    |${w.getCurrentIndent()}for (auto &item : $value) {
-                    |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item.second")}
-                    |${w.getCurrentIndent()}${w.getIndent()}map_with_json_${name}[item.first] = item_value;
-                    |${w.getCurrentIndent()}}
-                    |${w.getCurrentIndent()}json11::Json $name = json11::Json(map_with_json_${name});""".stripMargin('|')
+                  s"""std::map<std::string, json11::Json> map_with_json_${name};
+                      |${w.getCurrentIndent()}for (auto &item : $value) {
+                      |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "item_value", "item.second")}
+                      |${w.getCurrentIndent()}${w.getIndent()}map_with_json_${name}[item.first] = item_value;
+                      |${w.getCurrentIndent()}}
+                      |${w.getCurrentIndent()}$field_prefix json11::Json(map_with_json_${name})$field_suffix;""".stripMargin('|')
                 }
-                case MString => s"json11::Json $name = json11::Json($value);"
+                case MString => s"$field_prefix json11::Json($value)$field_suffix;"
                 case p: MPrimitive => p._idlName match {
-                  case "bool" => s"json11::Json $name = json11::Json($value);"
-                  case "i8" | "i16" | "i32" | "i64" => s"json11::Json $name = json11::Json(static_cast<int>($value));"
-                  case "f32" | "f64" => s"json11::Json $name = json11::Json(static_cast<double>($value));"
+                  case "bool" => s"$field_prefix json11::Json($value)$field_suffix;"
+                  case "i8" | "i16" | "i32" | "i64" => s"$field_prefix json11::Json(static_cast<int>($value))$field_suffix;"
+                  case "f32" | "f64" => s"$field_prefix json11::Json(static_cast<double>($value))$field_suffix;"
                   case _ => throw new AssertionError("Unreachable")
                 }
-                case MDate => s"json11::Json $name = json11::Json($value.time_since_epoch().count());"
-                case MOptional => s"json11::Json $name = json11::Json($value.value_or(NULL));"
+                case MDate => s"$field_prefix json11::Json($value.time_since_epoch().count())$field_suffix;"
+                case MOptional =>
+                  s"""if ($value) {
+                      |${w.getCurrentIndent()}${w.getIndent()}${cppFor(expr.args.head, "actual_value", s"$value.value()")}
+                      |${w.getCurrentIndent()}${w.getIndent()}$field_prefix actual_value $field_suffix;
+                      |${w.getCurrentIndent()}}""".stripMargin
                 case d: MDef => d.defType match {
-                  case DRecord => s"json11::Json $name = parsed_json_from_${marshal.fieldType(expr)}($value);"
+                  case DRecord => s"$field_prefix parsed_json_from_${marshal.fieldType(expr)}($value)$field_suffix;"
                   case _ => throw new AssertionError("Unreachable")
                 }
                 case _ => throw new AssertionError("Unreachable")
               }
             }
 
-
+            w.wl(s"auto record_json = json11::Json::object({});")
             for (f <- r.fields) {
               val name = idCpp.field(f.ident)
               w.wl(cppFor(f.ty.resolved, name, s"record.$name"))
             }
-            val params = r.fields.map((f) => {
-              "{ \"" + idJava.method(f.ident) + "\", " + idCpp.field(f.ident) + " }"
-            }).mkString(", ")
-            w.wl(s"return json11::Json::object({$params});")
+            w.wl(s"return record_json;")
           }
           w.wl
           w.w(s"std::string json_from_$actualSelf (const $actualSelf& record)").braced {
